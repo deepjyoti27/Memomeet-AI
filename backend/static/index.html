@@ -1,0 +1,2594 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MemoMeet AI - Enterprise Meeting Brain & Truth Engine</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            darkBg: {
+              DEFAULT: '#050314',
+              card: '#0d0a21',
+              hover: '#151133',
+            },
+            brand: {
+              purple: '#7000ff',
+              purpleLight: '#9d4edd',
+              cyan: '#00f5ff',
+              blue: '#3a86c8',
+            },
+            glass: {
+              white: 'rgba(255, 255, 255, 0.03)',
+              border: 'rgba(255, 255, 255, 0.06)',
+            }
+          },
+          boxShadow: {
+            'glow-purple': '0 0 20px rgba(112, 0, 255, 0.35)',
+            'glow-cyan': '0 0 20px rgba(0, 245, 255, 0.25)',
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Outfit', 'Inter', sans-serif;
+      background: radial-gradient(circle at center, #0f0b26 0%, #050314 100%);
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .glass-panel {
+      background: rgba(13, 10, 33, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(112, 0, 255, 0.25);
+      box-shadow: 0 0 20px rgba(112, 0, 255, 0.1);
+      transform: translateY(-2px);
+    }
+    .text-gradient-purple {
+      background: linear-gradient(135deg, #ffffff 30%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .highlight-evidence {
+      background: linear-gradient(120deg, rgba(0, 245, 255, 0.15) 0%, rgba(0, 245, 255, 0.05) 100%);
+      border-left: 2px solid #00f5ff;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(112, 0, 255, 0.2);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(112, 0, 255, 0.4);
+    }
+    input, select, textarea {
+      background-color: #0f0a2c !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    input::placeholder, textarea::placeholder {
+      color: rgba(255, 255, 255, 0.3) !important;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #7000ff !important;
+      box-shadow: 0 0 10px rgba(112, 0, 255, 0.35) !important;
+      outline: none;
+    }
+    /* Skeleton Loader animation */
+    @keyframes skeletonGlow {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+      background-size: 200% 100%;
+      animation: skeletonGlow 1.5s infinite;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="flex min-h-screen">
+
+  <!-- ==================== SIDEBAR ==================== -->
+  <aside id="sidebar-container" class="w-64 glass-panel border-r border-glass-border flex flex-col justify-between p-4 sticky top-0 h-screen shrink-0 hidden z-30">
+    <div>
+      <div class="flex items-center gap-3 px-3 py-4 mb-4 group cursor-pointer" onclick="navigate('landing')">
+        <div class="relative">
+          <div class="absolute -inset-1 bg-brand-purple rounded-lg blur opacity-30 group-hover:opacity-75 transition duration-500"></div>
+          <div class="relative w-9 h-9 rounded-lg bg-black flex items-center justify-center border border-brand-purple/40">
+            <i data-lucide="brain-circuit" class="w-5 h-5 text-brand-cyan animate-pulse"></i>
+          </div>
+        </div>
+        <div>
+          <h1 class="font-bold text-base tracking-wider text-gradient-purple">MEMOMEET AI</h1>
+          <p class="text-[10px] text-zinc-500 font-mono tracking-tight">MEETING BRAIN v2.0</p>
+        </div>
+      </div>
+
+      <!-- Workspace Switcher Selector -->
+      <div class="px-3 mb-6 relative">
+        <label class="text-[8px] font-mono tracking-widest text-zinc-500 block mb-1.5 uppercase">Active Workspace</label>
+        <div class="flex gap-2 items-center">
+          <select id="sidebar-workspace-select" onchange="changeActiveWorkspace()" class="flex-1 text-[11px] font-bold bg-darkBg border border-white/10 rounded-lg px-2 py-1.5 text-white focus:outline-none cursor-pointer">
+            <!-- Populated via JS -->
+          </select>
+          <button onclick="openCreateWorkspaceModal()" title="Manage Workspaces" class="p-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-brand-purple/50 text-zinc-400 hover:text-white transition-all">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <nav class="space-y-0.5" id="nav-links">
+        <!-- Links dynamically styled via javascript -->
+      </nav>
+    </div>
+
+    <!-- Health Widget & Profile -->
+    <div class="mt-auto space-y-4">
+      <div class="p-3 rounded-xl bg-white/2 border border-glass-border">
+        <div class="flex justify-between items-center mb-1.5">
+          <span class="text-[10px] text-zinc-400 font-medium">Memory Health</span>
+          <span id="health-value" class="text-[10px] font-mono font-bold text-emerald-400">100%</span>
+        </div>
+        <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+          <div id="health-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width: 100%"></div>
+        </div>
+        <div class="flex items-center gap-2 mt-2 text-[9px] text-zinc-500 font-mono">
+          <i data-lucide="activity" class="w-3 h-3 text-emerald-500"></i>
+          <span>SQL DB: CONNECTED</span>
+        </div>
+      </div>
+
+      <!-- Profile & Logout row -->
+      <div class="flex items-center justify-between px-2.5 py-2 rounded-xl bg-white/3 border border-white/5">
+        <div class="flex items-center gap-2 truncate flex-1 mr-2">
+          <div class="w-7 h-7 rounded-full bg-brand-purple/20 flex items-center justify-center border border-brand-purple/35 text-[10px] font-bold text-brand-purpleLight uppercase" id="user-avatar">
+            U
+          </div>
+          <div class="truncate">
+            <p class="text-xs font-semibold text-zinc-200 truncate leading-none" id="user-name">User Name</p>
+            <span class="text-[8px] text-zinc-500 font-mono tracking-tight block mt-0.5" id="user-designation">Designation</span>
+          </div>
+        </div>
+        <button onclick="handleLogout()" title="Logout" class="text-zinc-500 hover:text-rose-400 transition-colors p-1">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN PANEL ==================== -->
+  <main class="flex-1 min-h-screen relative overflow-y-auto px-8 py-6" id="main-content">
+
+    <!-- Radial Background glows -->
+    <div class="absolute w-[500px] h-[500px] rounded-full bg-brand-purple/10 blur-[80px] -top-40 -left-40 pointer-events-none"></div>
+    <div class="absolute w-[600px] h-[600px] rounded-full bg-brand-cyan/5 blur-[80px] -bottom-40 -right-40 pointer-events-none"></div>
+
+    <!-- Header / Global Search / Notification bell (Hidden on landing/auth pages) -->
+    <header id="global-header" class="flex justify-between items-center mb-6 hidden">
+      <!-- Universal Search -->
+      <div class="relative w-80">
+        <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-zinc-500"></i>
+        <input type="text" id="global-search-input" onkeyup="handleGlobalSearch(event)" class="w-full bg-white/2 border border-white/8 rounded-full pl-9 pr-4 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none" placeholder="Search meetings, decisions, requirements, tasks...">
+        <div id="search-dropdown" class="absolute left-0 right-0 mt-2 glass-panel rounded-xl border border-glass-border p-2 hidden max-h-60 overflow-y-auto z-40 text-xs">
+          <!-- Search results loaded via JS -->
+        </div>
+      </div>
+
+      <!-- Alert center bell -->
+      <div class="relative">
+        <button onclick="toggleAlertCenterTray()" class="p-2 rounded-full bg-white/5 border border-white/10 hover:border-brand-purple/50 text-zinc-300 hover:text-white transition-all relative">
+          <i data-lucide="bell" class="w-4 h-4"></i>
+          <span id="alert-badge" class="absolute top-0 right-0 w-2 h-2 rounded-full bg-rose-500 animate-pulse hidden"></span>
+        </button>
+        <!-- Alert Center Tray drop-down -->
+        <div id="alert-tray" class="absolute right-0 mt-3.5 w-80 glass-panel rounded-2xl border border-glass-border p-4 hidden z-40 space-y-3 shadow-2xl">
+          <div class="flex justify-between items-center border-b border-white/5 pb-2">
+            <h4 class="text-xs font-bold text-white uppercase flex items-center gap-1.5">
+              <i data-lucide="alert-octagon" class="w-4 h-4 text-brand-purpleLight animate-pulse"></i>
+              AI Notification Center
+            </h4>
+            <span class="text-[8px] font-mono text-zinc-500" id="alert-tray-count">0 warnings</span>
+          </div>
+          <div id="alert-tray-list" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+            <!-- Alerts populate dynamically -->
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ==================== VIEW 1: LANDING PAGE ==================== -->
+    <section id="view-landing" class="hidden min-h-screen flex flex-col justify-between py-10 max-w-7xl mx-auto w-full">
+      <header class="flex items-center justify-between w-full">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded bg-gradient-to-tr from-brand-purple to-brand-cyan flex items-center justify-center border border-white/20">
+            <i data-lucide="brain-circuit" class="w-4.5 h-4.5 text-white"></i>
+          </div>
+          <span class="font-bold text-sm tracking-wider font-mono">MEMOMEET AI</span>
+        </div>
+        <button onclick="navigate('login')" class="px-4.5 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-brand-purple/50 text-xs font-semibold tracking-wide flex items-center gap-1.5 transition-all">
+          <span>ENTER WORKSPACE</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </button>
+      </header>
+
+      <div class="text-center py-20 max-w-4xl mx-auto space-y-8">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-brand-purple/20 bg-brand-purple/5 text-[10px] font-mono font-bold tracking-widest text-brand-purpleLight">
+          <i data-lucide="fingerprint" class="w-3.5 h-3.5"></i>
+          ORGANIZATIONAL TRUTH ENGINE
+        </div>
+        <h1 class="text-4xl md:text-7xl font-extrabold tracking-tighter leading-tight text-white">
+          The Memory Brain For <br>
+          <span class="bg-gradient-to-r from-brand-cyan via-brand-purple to-brand-purpleLight bg-clip-text text-transparent">Business Meetings.</span>
+        </h1>
+        <p class="text-zinc-400 text-sm md:text-lg max-w-2xl mx-auto leading-relaxed">
+          MemoMeet AI doesn't just summarize. It remembers agreements forever, detects contradictions with historical records, and visually models your product requirements graph.
+        </p>
+        <div class="flex justify-center pt-4">
+          <button onclick="navigate('login')" class="px-8 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-brand-purple to-indigo-600 hover:shadow-glow-purple border border-brand-purpleLight/40 transition-all flex items-center gap-2">
+            <span>Launch Workspace Dashboard</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Hero Feature Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 pt-16 max-w-5xl mx-auto text-left">
+          <div class="glass-panel p-5 rounded-xl border border-glass-border space-y-3">
+            <i data-lucide="search-code" class="w-6 h-6 text-brand-purpleLight"></i>
+            <h3 class="text-xs font-bold uppercase text-white">Truth Verification</h3>
+            <p class="text-[11px] text-zinc-500 leading-normal">Legal-grade temporal verification of agreements, linking quotes to exact speakers and dates.</p>
+          </div>
+          <div class="glass-panel p-5 rounded-xl border border-glass-border space-y-3">
+            <i data-lucide="shield-alert" class="w-6 h-6 text-brand-cyan"></i>
+            <h3 class="text-xs font-bold uppercase text-white">Contradiction Detector</h3>
+            <p class="text-[11px] text-zinc-500 leading-normal">Identifies and flags assertions in meetings that directly conflict with historical statements.</p>
+          </div>
+          <div class="glass-panel p-5 rounded-xl border border-glass-border space-y-3">
+            <i data-lucide="network" class="w-6 h-6 text-indigo-400"></i>
+            <h3 class="text-xs font-bold uppercase text-white">Business Memory Graph</h3>
+            <p class="text-[11px] text-zinc-500 leading-normal">Draggable, interactive link graph connecting meetings, decisions, risks, and deadlines.</p>
+          </div>
+          <div class="glass-panel p-5 rounded-xl border border-glass-border space-y-3">
+            <i data-lucide="trending-up" class="w-6 h-6 text-emerald-400"></i>
+            <h3 class="text-xs font-bold uppercase text-white">Risk Prediction</h3>
+            <p class="text-[11px] text-zinc-500 leading-normal">Algorithmic risk evaluation, auditing scope creep thresholds and stakeholder misalignment.</p>
+          </div>
+        </div>
+      </div>
+
+      <footer class="text-center text-[10px] font-mono text-zinc-600">
+        © 2026 MEMOMEET AI SYSTEMS INC. ALL RIGHTS RESERVED. SECURED VIA HINDSIGHT MEMORY ENGINE.
+      </footer>
+    </section>
+
+    <!-- ==================== VIEW 2: LOGIN ==================== -->
+    <section id="view-login" class="hidden min-h-screen flex flex-col justify-center items-center py-12">
+      <div class="w-full max-w-md glass-panel p-8 rounded-2xl border border-glass-border space-y-6">
+        <div class="text-center space-y-1">
+          <i data-lucide="brain-circuit" class="w-8 h-8 text-brand-cyan mx-auto"></i>
+          <h2 class="text-xl font-bold text-white tracking-tight">Access MemoMeet Brain</h2>
+          <p class="text-xs text-zinc-500">Sign in to your enterprise workspace</p>
+        </div>
+        <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+          <div class="space-y-1">
+            <label class="text-[9px] font-mono text-zinc-400 uppercase">Email Address</label>
+            <input type="email" id="login-email" required class="w-full bg-white/2 border border-white/8 rounded-lg px-3 py-2 text-xs text-white">
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between items-center">
+              <label class="text-[9px] font-mono text-zinc-400 uppercase">Password</label>
+              <button type="button" onclick="navigate('forgot-password')" class="text-[9px] font-mono text-brand-purpleLight hover:text-white transition-colors">Forgot password?</button>
+            </div>
+            <input type="password" id="login-password" required class="w-full bg-white/2 border border-white/8 rounded-lg px-3 py-2 text-xs text-white">
+          </div>
+          <button type="submit" class="w-full py-3 rounded-lg bg-gradient-to-r from-brand-purple to-indigo-600 hover:shadow-glow-purple text-xs font-bold transition-all">
+            SIGN IN
+          </button>
+        </form>
+        <div class="text-center text-xs text-zinc-500 pt-2 border-t border-white/5">
+          Don't have an account? 
+          <button onclick="navigate('register')" class="text-brand-cyan hover:underline ml-1">Create one here</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 3: REGISTER ==================== -->
+    <section id="view-register" class="hidden min-h-screen flex flex-col justify-center items-center py-12">
+      <div class="w-full max-w-md glass-panel p-8 rounded-2xl border border-glass-border space-y-6">
+        <div class="text-center space-y-1">
+          <i data-lucide="user-plus" class="w-8 h-8 text-brand-purpleLight mx-auto"></i>
+          <h2 class="text-xl font-bold text-white tracking-tight">Register Organization</h2>
+          <p class="text-xs text-zinc-500">Initialize your secure collaborative memory node</p>
+        </div>
+        <form onsubmit="handleRegisterSubmit(event)" class="space-y-4">
+          <div class="space-y-1">
+            <label class="text-[9px] font-mono text-zinc-400 uppercase">Full Name</label>
+            <input type="text" id="reg-name" required class="w-full bg-white/2 border border-white/8 rounded-lg px-3 py-2 text-xs text-white">
+          </div>
+          <div class="space-y-1">
+            <label class="text-[9px] font-mono text-zinc-400 uppercase">Email Address</label>
+            <input type="email" id="reg-email" required class="w-full bg-white/2 border border-white/8 rounded-lg px-3 py-2 text-xs text-white">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="text-[9px] font-mono text-zinc-400 uppercase">Company Name</label>
+              <input type="text" id="reg-company" required class="w-full bg-white/2 border border-white/8 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[9px] font-mono text-zinc-400 uppercase">Designation</label>
+              <input type="text" id="reg-designation" required class="w-full bg-white/2 border border-white/8 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+          </div>
+          <div class="space-y-1">
+            <label class="text-[9px] font-mono text-zinc-400 uppercase">Password</label>
+            <input type="password" id="reg-password" required class="w-full bg-white/2 border border-white/8 rounded-lg px-3 py-2 text-xs text-white" placeholder="Minimum 6 characters">
+          </div>
+          <button type="submit" class="w-full py-3 rounded-lg bg-gradient-to-r from-brand-purple to-indigo-600 hover:shadow-glow-purple text-xs font-bold transition-all">
+            CREATE ACCOUNT
+          </button>
+        </form>
+        <div class="text-center text-xs text-zinc-500 pt-2 border-t border-white/5">
+          Already registered? 
+          <button onclick="navigate('login')" class="text-brand-cyan hover:underline ml-1">Login here</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 4: FORGOT PASSWORD ==================== -->
+    <section id="view-forgot-password" class="hidden min-h-screen flex flex-col justify-center items-center py-12">
+      <div class="w-full max-w-md glass-panel p-8 rounded-2xl border border-glass-border space-y-6">
+        <div class="text-center space-y-1">
+          <i data-lucide="key" class="w-8 h-8 text-amber-500 mx-auto"></i>
+          <h2 class="text-xl font-bold text-white tracking-tight">Forgot Password</h2>
+          <p class="text-xs text-zinc-500">Provide registration email to recover credentials</p>
+        </div>
+        <form onsubmit="handleForgotPasswordSubmit(event)" class="space-y-4">
+          <div class="space-y-1">
+            <label class="text-[9px] font-mono text-zinc-400 uppercase">Email Address</label>
+            <input type="email" id="forgot-email" required class="w-full bg-white/2 border border-white/8 rounded-lg px-3 py-2 text-xs text-white">
+          </div>
+          <button type="submit" class="w-full py-3 rounded-lg bg-gradient-to-r from-brand-purple to-indigo-600 hover:shadow-glow-purple text-xs font-bold transition-all">
+            SEND RESET LINK
+          </button>
+        </form>
+        <div class="text-center text-xs text-zinc-500 pt-2 border-t border-white/5">
+          Remember credentials? 
+          <button onclick="navigate('login')" class="text-brand-cyan hover:underline ml-1">Sign in here</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 5: EMAIL VERIFICATION ==================== -->
+    <section id="view-verify-email" class="hidden min-h-screen flex flex-col justify-center items-center py-12">
+      <div class="w-full max-w-md glass-panel p-8 rounded-2xl border border-glass-border space-y-6">
+        <div class="text-center space-y-1">
+          <i data-lucide="shield-check" class="w-8 h-8 text-emerald-400 mx-auto"></i>
+          <h2 class="text-xl font-bold text-white tracking-tight">Verify Email Address</h2>
+          <p class="text-xs text-zinc-500">Enter validation code sent to your inbox</p>
+        </div>
+        <form onsubmit="handleVerifyEmailSubmit(event)" class="space-y-4">
+          <div class="space-y-1 text-center">
+            <label class="text-[9px] font-mono text-zinc-400 uppercase block mb-2">VERIFICATION CODE</label>
+            <input type="text" id="verify-code" required class="w-32 bg-white/2 border border-white/8 rounded-lg px-4 py-2.5 text-center text-lg tracking-widest font-mono text-white focus:border-brand-cyan" placeholder="123456" maxlength="6">
+          </div>
+          <button type="submit" class="w-full py-3 rounded-lg bg-gradient-to-r from-brand-purple to-indigo-600 hover:shadow-glow-purple text-xs font-bold transition-all">
+            COMPLETE VERIFICATION
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 6: ONBOARDING WIZARD ==================== -->
+    <section id="view-onboarding" class="hidden min-h-screen flex flex-col justify-center items-center py-12">
+      <div class="w-full max-w-lg glass-panel p-8 rounded-2xl border border-glass-border space-y-6">
+        <div class="text-center space-y-1">
+          <i data-lucide="sparkles" class="w-8 h-8 text-brand-cyan mx-auto"></i>
+          <h2 class="text-xl font-bold text-white tracking-tight">Setup Workspace Wizard</h2>
+          <p class="text-xs text-zinc-500">Tailor the Hindsight Memory graph for your team</p>
+        </div>
+        
+        <!-- Onboarding Form slides -->
+        <form onsubmit="handleOnboardingSubmit(event)" class="space-y-5">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="text-[9px] font-mono text-zinc-400 uppercase">Team Name</label>
+              <input type="text" id="onboard-team" required class="w-full bg-white/2 border border-white/8 rounded-lg px-3 py-2 text-xs text-white" value="Core Engineering Team">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[9px] font-mono text-zinc-400 uppercase">Industry Focus</label>
+              <select id="onboard-industry" class="w-full bg-zinc-900 border border-white/8 rounded-lg px-3 py-2 text-xs text-white">
+                <option value="SaaS">Enterprise Software / SaaS</option>
+                <option value="Finance">Financial Services</option>
+                <option value="E-Commerce">Global Retail & Commerce</option>
+                <option value="Healthcare">Healthcare & BioTech</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="text-[9px] font-mono text-zinc-400 uppercase">Estimated Team Size</label>
+              <select id="onboard-size" class="w-full bg-zinc-900 border border-white/8 rounded-lg px-3 py-2 text-xs text-white">
+                <option value="1">Just Me (1 user)</option>
+                <option value="5">Startup (2-10 users)</option>
+                <option value="30">Growth Team (10-50 users)</option>
+                <option value="100">Enterprise Node (50+ users)</option>
+              </select>
+            </div>
+            <div class="space-y-1">
+              <label class="text-[9px] font-mono text-zinc-400 uppercase">Primary Brain Use Case</label>
+              <select id="onboard-usecase" class="w-full bg-zinc-900 border border-white/8 rounded-lg px-3 py-2 text-xs text-white">
+                <option value="Compliance">Truth Audits & Compliance</option>
+                <option value="Timeline">Timeline & Commitments Tracking</option>
+                <option value="Graph">Graph Modelling Requirements</option>
+                <option value="All">All Intelligence Widgets</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-lg bg-gradient-to-r from-brand-purple to-indigo-600 hover:shadow-glow-purple text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+            <span>GENERATE SAAS WORKSPACE</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 7: DASHBOARD ==================== -->
+    <section id="view-dashboard" class="hidden space-y-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="text-[10px] font-mono tracking-widest text-brand-purpleLight block">OVERVIEW</span>
+          <h2 class="text-2xl font-extrabold text-white tracking-tight">Intelligence Dashboard</h2>
+        </div>
+        <button onclick="navigate('upload')" class="px-4 py-2 rounded-lg bg-gradient-to-r from-brand-purple to-indigo-600 hover:shadow-glow-purple border border-brand-purpleLight/30 text-xs font-semibold transition-all">
+          Upload Transcript
+        </button>
+      </div>
+
+      <!-- Quick Metrics Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-6 gap-4" id="dashboard-stats-grid">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Main Visual Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Chart -->
+        <div class="lg:col-span-2 glass-panel p-5 rounded-2xl border border-glass-border flex flex-col justify-between space-y-4">
+          <div>
+            <h3 class="text-sm font-semibold flex items-center gap-2">
+              <i data-lucide="trending-up" class="w-4 h-4 text-brand-cyan"></i>
+              Customer Sentiment Tracking
+            </h3>
+            <p class="text-xs text-zinc-500 mt-0.5">Chronological sentiment trends across recent interactions.</p>
+          </div>
+          <div class="w-full h-44 relative bg-black/20 rounded-lg overflow-hidden border border-white/2">
+            <svg class="w-full h-full p-4" viewBox="0 0 100 30" preserveAspectRatio="none">
+              <path d="M 0 15 Q 25 5, 50 25 T 100 12 L 100 30 L 0 30 Z" fill="rgba(0, 245, 255, 0.1)"></path>
+              <path d="M 0 15 Q 25 5, 50 25 T 100 12" fill="none" stroke="#00f5ff" stroke-width="0.8"></path>
+              <line x1="0" y1="15" x2="100" y2="15" stroke="rgba(255,255,255,0.05)" stroke-width="0.1" />
+            </svg>
+            <div class="absolute bottom-2 left-4 right-4 flex justify-between text-[8px] font-mono text-zinc-500">
+              <span>JAN KICKOFF</span>
+              <span>FEB REVIEW</span>
+              <span>APR BUDGET</span>
+              <span>JUN ALIGNMENT</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Meetings -->
+        <div class="glass-panel p-5 rounded-2xl border border-glass-border flex flex-col justify-between space-y-4">
+          <div>
+            <h3 class="text-sm font-semibold text-white">Recent Meetings</h3>
+            <p class="text-xs text-zinc-500 mt-0.5">Quick access to indexed meetings.</p>
+          </div>
+          <div class="space-y-2 flex-1" id="recent-meetings-list">
+            <!-- Loaded via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Contradictions Section -->
+      <div class="space-y-4">
+        <h3 class="text-sm font-semibold flex items-center gap-2">
+          <i data-lucide="shield-alert" class="w-4 h-4 text-rose-400"></i>
+          Unresolved Contradictions
+        </h3>
+        <div class="space-y-4" id="dashboard-contradictions-container">
+          <!-- Loaded via JS -->
+        </div>
+      </div>
+
+      <!-- Risk Predictions -->
+      <div class="space-y-4">
+        <h3 class="text-sm font-semibold flex items-center gap-2">
+          <i data-lucide="alert-octagon" class="w-4 h-4 text-amber-500"></i>
+          Predicted Risks
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="dashboard-risks-container">
+          <!-- Loaded via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 8: UPLOAD MEETING ==================== -->
+    <section id="view-upload" class="hidden space-y-6">
+      <div>
+        <span class="text-[10px] font-mono tracking-widest text-brand-purpleLight block">MEMORY INGESTION</span>
+        <h2 class="text-2xl font-extrabold text-white tracking-tight">Upload Meeting</h2>
+      </div>
+
+      <!-- Form & Template Sandboxes -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div class="lg:col-span-2 glass-panel p-6 rounded-2xl border border-glass-border space-y-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-mono text-zinc-400">MEETING TITLE</label>
+              <input type="text" id="upload-title" class="w-full bg-white/2 border border-white/8 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:border-brand-purple text-white" value="Acme Corp: Mobile Decision Shift">
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-mono text-zinc-400">CUSTOMER / CLIENT</label>
+              <select id="upload-customer" class="w-full bg-zinc-900 border border-white/8 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:border-brand-purple text-white">
+                <!-- Loaded via JS -->
+              </select>
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-mono text-zinc-400">MEETING DATE</label>
+              <input type="date" id="upload-date" class="w-full bg-white/2 border border-white/8 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:border-brand-purple text-white font-mono" value="2026-06-05">
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-mono text-zinc-400">DURATION (SECONDS)</label>
+              <input type="number" id="upload-duration" class="w-full bg-white/2 border border-white/8 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:border-brand-purple text-white font-mono" value="1200">
+            </div>
+          </div>
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-mono text-zinc-400">TRANSCRIPT LINES (SPEAKER: DIALOGUE)</label>
+            <textarea id="upload-transcript" rows="6" class="w-full bg-white/2 border border-white/8 rounded-lg p-3 text-xs focus:outline-none focus:border-brand-purple text-zinc-300 font-mono resize-none leading-relaxed"></textarea>
+          </div>
+          <button onclick="processIngest()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-purple to-indigo-600 hover:shadow-glow-purple font-bold text-xs tracking-wider transition-all flex items-center justify-center gap-2">
+            <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+            <span>PROCESS WITH HINDSIGHT ENGINE</span>
+          </button>
+        </div>
+
+        <!-- Templates selection -->
+        <div class="glass-panel p-5 rounded-2xl border border-glass-border space-y-4">
+          <h3 class="text-sm font-semibold text-white">Select Demo Template</h3>
+          <div class="space-y-2.5">
+            <button onclick="loadTemplate('acme')" class="w-full text-left p-3 rounded-lg bg-white/2 hover:bg-white/5 border border-white/5 transition-all text-xs font-mono text-zinc-300">
+              Acme Corp: Mobile Shift (Trigger Contradiction)
+            </button>
+            <button onclick="loadTemplate('nebula')" class="w-full text-left p-3 rounded-lg bg-white/2 hover:bg-white/5 border border-white/5 transition-all text-xs font-mono text-zinc-300">
+              Nebula Systems: Cloud Compliance Review
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 9: RECORDER ==================== -->
+    <section id="view-recorder" class="hidden space-y-6">
+      <div>
+        <span class="text-[10px] font-mono tracking-widest text-brand-purpleLight block">AUDIO CAPTURE</span>
+        <h2 class="text-2xl font-extrabold text-white tracking-tight">Meeting Recorder</h2>
+      </div>
+
+      <div class="flex flex-col items-center justify-center py-12 space-y-8">
+        <div class="glass-panel w-full max-w-xl p-8 rounded-2xl border border-glass-border flex flex-col items-center justify-center space-y-6">
+          <div class="w-full h-32 relative bg-black/30 rounded-xl overflow-hidden border border-white/5 flex items-center justify-center">
+            <canvas id="record-canvas" width="500" height="128" class="w-full h-full"></canvas>
+            <div id="recorder-standby" class="absolute inset-0 flex items-center justify-center text-zinc-500 text-xs font-mono gap-1.5">
+              <i data-lucide="volume-2" class="w-4 h-4"></i>
+              <span>STANDBY</span>
+            </div>
+          </div>
+          <div class="text-center">
+            <span id="recording-timer" class="text-4xl font-extrabold font-mono text-white">00:00</span>
+            <p id="recorder-status" class="text-[10px] font-mono text-zinc-500 mt-1 uppercase">Microphone Standby</p>
+          </div>
+          <div class="flex justify-center items-center gap-4">
+            <button id="btn-record-start" onclick="startMicRecording()" class="w-14 h-14 rounded-full bg-rose-600 hover:bg-rose-500 hover:shadow-glow-purple flex items-center justify-center text-white border border-rose-500/20 transition-all">
+              <i data-lucide="mic" class="w-6 h-6 animate-pulse"></i>
+            </button>
+            <button id="btn-record-stop" onclick="stopMicRecording()" class="w-14 h-14 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-rose-500 transition-all hidden">
+              <i data-lucide="square" class="w-6 h-6"></i>
+            </button>
+          </div>
+        </div>
+        <div class="max-w-md text-center bg-white/1 border border-white/3 p-4 rounded-xl flex items-start gap-3 text-left">
+          <i data-lucide="info" class="w-4 h-4 text-brand-cyan shrink-0 mt-0.5"></i>
+          <p class="text-[11px] text-zinc-500 leading-normal">
+            Stops compile a simulated transcript Session for Vortex Retail to keep the demo environment unblocked.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 10: HISTORY ==================== -->
+    <section id="view-history" class="hidden space-y-6">
+      <div>
+        <span class="text-[10px] font-mono tracking-widest text-brand-purpleLight block">ARCHIVES</span>
+        <h2 class="text-2xl font-extrabold text-white tracking-tight">Meeting History</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Directory -->
+        <div class="lg:col-span-4 glass-panel p-4 rounded-2xl border border-glass-border space-y-3 max-h-[70vh] overflow-y-auto">
+          <span class="text-[10px] font-mono text-zinc-500 uppercase block px-1">Meeting Directory</span>
+          <div class="space-y-2" id="history-meetings-list">
+            <!-- Loaded via JS -->
+          </div>
+        </div>
+
+        <!-- Detail Inspector -->
+        <div class="lg:col-span-8 flex flex-col space-y-6" id="history-detail-panel">
+          <!-- Loaded via JS on select -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 11: CUSTOMER TIMELINE ==================== -->
+    <section id="view-timeline" class="hidden space-y-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="text-[10px] font-mono tracking-widest text-brand-purpleLight block">EVOLUTION CHRONOLOGY</span>
+          <h2 class="text-2xl font-extrabold text-white tracking-tight">Customer Evolution Timeline</h2>
+        </div>
+        <select id="timeline-customer-select" onchange="loadCustomerTimeline()" class="bg-zinc-900 border border-white/8 rounded-lg px-3.5 py-1.5 text-xs text-white focus:outline-none focus:border-brand-purple font-sans">
+          <!-- Loaded via JS -->
+        </select>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-8 relative pl-8 space-y-6" id="timeline-events-container">
+          <!-- Left side events loaded via JS -->
+        </div>
+
+        <div class="lg:col-span-4 glass-panel p-5 rounded-2xl border border-glass-border space-y-4">
+          <span class="text-[10px] font-mono tracking-widest text-brand-cyan uppercase flex items-center gap-1.5">
+            <i data-lucide="brain-circuit" class="w-4 h-4 animate-pulse"></i>
+            Evolution Insights
+          </span>
+          <div class="space-y-3.5 text-xs text-zinc-400">
+            <p class="leading-relaxed">This view traces chronological project priority evolution, graphing decision pivots, scope additions, and sentiment averages across meetings.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 12: TRUTH VERIFICATION ==================== -->
+    <section id="view-truth-verification" class="hidden space-y-6">
+      <div>
+        <span class="text-[10px] font-mono tracking-widest text-brand-purpleLight block">TRUTH AUDIT ENGINE</span>
+        <h2 class="text-2xl font-extrabold text-white tracking-tight">Truth Verification</h2>
+      </div>
+
+      <form onsubmit="runTruthQuery(event)" class="w-full max-w-3xl flex items-center gap-2">
+        <div class="relative flex-1 flex items-center">
+          <input type="text" id="truth-input" required class="w-full bg-white/2 border border-white/8 rounded-2xl pl-12 pr-4 py-4 text-xs text-white focus:outline-none focus:border-brand-cyan focus:shadow-glow-cyan" placeholder="Search for historical commitments: 'Did we decide to support mobile app?'...">
+          <i data-lucide="search" class="absolute left-4.5 w-5 h-5 text-zinc-500"></i>
+        </div>
+        <button type="submit" class="px-5 py-4 rounded-2xl bg-gradient-to-r from-brand-purple to-indigo-600 text-xs font-bold hover:shadow-glow-purple transition-all">
+          VERIFY TRUTH
+        </button>
+      </form>
+
+      <!-- Suggested row -->
+      <div class="space-y-2" id="suggested-audits-row">
+        <span class="text-[10px] font-mono text-zinc-500 uppercase block">Suggested Queries</span>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="runSuggestedTruth('Stripe billing integration')" class="px-3.5 py-2 rounded-xl bg-white/2 border border-white/4 hover:border-brand-cyan/20 text-xs text-zinc-400 hover:text-white transition-all">
+            Stripe billing integration
+          </button>
+          <button onclick="runSuggestedTruth('mobile app priority')" class="px-3.5 py-2 rounded-xl bg-white/2 border border-white/4 hover:border-brand-cyan/20 text-xs text-zinc-400 hover:text-white transition-all">
+            mobile app priority
+          </button>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start hidden" id="truth-results-panel">
+        <div class="lg:col-span-8 space-y-6">
+          <div class="glass-panel p-5 rounded-2xl border border-glass-border space-y-2">
+            <span class="text-[9px] font-mono text-brand-cyan uppercase block font-bold">DIRECT VERDICT</span>
+            <p id="truth-direct-answer" class="text-xs text-zinc-200 leading-relaxed font-semibold"></p>
+          </div>
+          <div class="space-y-4">
+            <span class="text-[10px] font-mono text-zinc-500 uppercase block">Verified Evidence Logs</span>
+            <div class="space-y-4" id="truth-evidence-stack"></div>
+          </div>
+        </div>
+        <div class="lg:col-span-4 glass-panel p-5 rounded-2xl border border-glass-border space-y-4">
+          <span class="text-[10px] font-mono tracking-widest text-brand-purpleLight uppercase block">Grades scale</span>
+          <p class="text-xs text-zinc-400">Matches above 90% classify as legal commitments.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 13: AI ASSISTANT ==================== -->
+    <section id="view-assistant" class="hidden space-y-6">
+      <div>
+        <span class="text-[10px] font-mono tracking-widest text-brand-purpleLight block">AI COMPLIANCE AGENT</span>
+        <h2 class="text-2xl font-extrabold text-white tracking-tight">AI Chief of Staff</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch h-[60vh]">
+        <div class="lg:col-span-8 glass-panel border border-glass-border rounded-2xl flex flex-col justify-between overflow-hidden">
+          <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-4">
+            <!-- Loaded via JS -->
+          </div>
+          <div class="p-3 border-t border-glass-border bg-black/20 space-y-3">
+            <div class="flex gap-2">
+              <button onclick="sendChatPrompt('What promises are still pending?')" class="px-2 py-1.5 rounded-lg bg-white/2 border border-white/5 text-[9px] text-zinc-400 hover:text-white">What promises are still pending?</button>
+              <button onclick="sendChatPrompt('What deadlines are overdue?')" class="px-2 py-1.5 rounded-lg bg-white/2 border border-white/5 text-[9px] text-zinc-400 hover:text-white">What deadlines are overdue?</button>
+            </div>
+            <form onsubmit="handleChatSubmit(event)" class="flex gap-2">
+              <input type="text" id="chat-input" class="flex-1 bg-white/2 border border-white/8 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-purple" placeholder="Ask about meeting logs...">
+              <button type="submit" class="p-2.5 rounded-xl bg-gradient-to-r from-brand-purple to-indigo-600 text-white"><i data-lucide="send" class="w-4 h-4"></i></button>
+            </form>
+          </div>
+        </div>
+
+        <div class="lg:col-span-4 glass-panel p-5 rounded-2xl border border-glass-border space-y-4">
+          <span class="text-[10px] font-mono tracking-widest text-brand-cyan uppercase block font-bold">Context References</span>
+          <div class="space-y-2.5" id="chat-references-stack">
+            <!-- Loaded via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 14: CUSTOMER INTELLIGENCE ==================== -->
+    <section id="view-customer-intelligence" class="hidden space-y-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="text-[10px] font-mono tracking-widest text-brand-purpleLight block">RELATIONSHIP NETWORKS</span>
+          <h2 class="text-2xl font-extrabold text-white tracking-tight">Customer Intelligence Map</h2>
+        </div>
+        <select id="graph-customer-select" onchange="loadCustomerGraph()" class="bg-zinc-900 border border-white/8 rounded-lg px-3.5 py-1.5 text-xs text-white focus:outline-none focus:border-brand-purple font-sans font-bold">
+          <!-- Loaded via JS -->
+        </select>
+      </div>
+
+      <!-- Graph visualizer -->
+      <div class="glass-panel border border-glass-border rounded-2xl overflow-hidden h-[450px] relative flex flex-col justify-end">
+        <div class="absolute top-4 left-4 z-10 space-y-1 bg-black/40 p-3 rounded-lg border border-white/5">
+          <h4 class="text-xs font-semibold text-zinc-300">BUSINESS MEMORY GRAPH</h4>
+          <p class="text-[10px] text-zinc-500 font-mono">Center is the Client. Outer circles show decisions, requirements, and deadlines.</p>
+        </div>
+        <div class="w-full h-full relative" id="graph-svg-container">
+          <!-- Loaded SVG dynamically via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 15: ACTION TRACKER ==================== -->
+    <section id="view-actions" class="hidden space-y-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="text-[10px] font-mono tracking-widest text-brand-purpleLight block">TASK MANAGEMENT</span>
+          <h2 class="text-2xl font-extrabold text-white tracking-tight">Action Tracker</h2>
+        </div>
+        <button onclick="openCreateTaskModal()" class="px-4 py-2 rounded-lg bg-gradient-to-r from-brand-purple to-indigo-600 hover:shadow-glow-purple border border-brand-purpleLight/30 text-xs font-semibold transition-all">
+          New Action Task
+        </button>
+      </div>
+
+      <!-- Task Columns Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6" id="tasks-board-grid">
+        <!-- Columns (Open, In Progress, Completed, Overdue) rendered via JS -->
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 16: HACKATHON WOW FEATURES ==================== -->
+    <section id="view-wow" class="hidden space-y-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="text-[10px] font-mono tracking-widest text-brand-cyan block font-bold uppercase">Hackathon Showcase</span>
+          <h2 class="text-2xl font-extrabold text-white tracking-tight">AI Premium Analytica</h2>
+        </div>
+        <select id="wow-customer-select" onchange="loadWoWFeatures()" class="bg-zinc-900 border border-white/8 rounded-lg px-3.5 py-1.5 text-xs text-white focus:outline-none focus:border-brand-purple font-sans font-bold">
+          <!-- Loaded via JS -->
+        </select>
+      </div>
+
+      <!-- Feature Selection Row -->
+      <div class="flex border-b border-white/10 gap-2 overflow-x-auto">
+        <button onclick="switchWoWTab('drift')" id="tab-btn-drift" class="px-4 py-2.5 text-xs font-bold border-b-2 border-brand-cyan text-brand-cyan transition-all">Requirement Drift</button>
+        <button onclick="switchWoWTab('commitments')" id="tab-btn-commitments" class="px-4 py-2.5 text-xs font-semibold text-zinc-400 hover:text-white border-b-2 border-transparent transition-all">Commitment Tracker</button>
+        <button onclick="switchWoWTab('influence')" id="tab-btn-influence" class="px-4 py-2.5 text-xs font-semibold text-zinc-400 hover:text-white border-b-2 border-transparent transition-all">Stakeholder Influence</button>
+        <button onclick="switchWoWTab('trust')" id="tab-btn-trust" class="px-4 py-2.5 text-xs font-semibold text-zinc-400 hover:text-white border-b-2 border-transparent transition-all">Customer Trust Score</button>
+        <button onclick="switchWoWTab('radar')" id="tab-btn-radar" class="px-4 py-2.5 text-xs font-semibold text-zinc-400 hover:text-white border-b-2 border-transparent transition-all">AI Risk Radar</button>
+      </div>
+
+      <!-- WoW Tab Contents -->
+      <div id="wow-tab-content" class="min-h-[400px]">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 17: SETTINGS ==================== -->
+    <section id="view-settings" class="hidden space-y-6">
+      <div>
+        <span class="text-[10px] font-mono tracking-widest text-brand-purpleLight block">CONFIGURATION</span>
+        <h2 class="text-2xl font-extrabold text-white tracking-tight">Settings Panel</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <form onsubmit="saveSettings(event)" class="lg:col-span-8 glass-panel p-6 rounded-2xl border border-glass-border space-y-5">
+          <div class="space-y-2">
+            <label class="text-xs font-semibold text-white flex items-center gap-2">
+              <i data-lucide="key" class="w-4 h-4 text-brand-cyan"></i>
+              Groq API Access Token
+            </label>
+            <input type="password" id="settings-api-key" class="w-full bg-white/2 border border-white/8 rounded-lg px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-purple" placeholder="Paste your gsk_... token to enable live completions">
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs font-semibold text-white flex items-center gap-2">
+              <i data-lucide="terminal" class="w-4 h-4 text-brand-purpleLight"></i>
+              AI Prompt Personas
+            </label>
+            <textarea id="settings-prompt" rows="3" class="w-full bg-white/2 border border-white/8 rounded-lg p-3 text-xs text-zinc-300 focus:outline-none focus:border-brand-purple font-mono"></textarea>
+          </div>
+          <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand-purple to-indigo-600 font-bold text-xs">SAVE OPTIONS</button>
+        </form>
+
+        <!-- Collaborators/Invite Panel inside settings -->
+        <div class="lg:col-span-4 glass-panel p-5 rounded-2xl border border-glass-border space-y-4">
+          <span class="text-[10px] font-mono tracking-widest text-brand-cyan block font-bold uppercase">Invite Team Member</span>
+          <form onsubmit="handleInviteSubmit(event)" class="space-y-3">
+            <div class="space-y-1">
+              <label class="text-[8px] font-mono text-zinc-500 uppercase">EMAIL ADDRESS</label>
+              <input type="email" id="invite-email" required class="w-full bg-white/2 border border-white/8 rounded-lg px-2.5 py-1.5 text-xs text-white">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[8px] font-mono text-zinc-500 uppercase">ROLE</label>
+              <select id="invite-role" class="w-full bg-zinc-900 border border-white/8 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                <option value="viewer">Viewer (Read-Only)</option>
+                <option value="manager">Manager (Edit Task/Meeting)</option>
+                <option value="admin">Admin (All Access)</option>
+              </select>
+            </div>
+            <button type="submit" class="w-full py-2 rounded-lg bg-gradient-to-r from-brand-purple to-indigo-600 font-bold text-xs transition-all">
+              SEND INVITE
+            </button>
+          </form>
+          <div class="border-t border-white/5 pt-3 space-y-2">
+            <label class="text-[8px] font-mono text-zinc-500 uppercase block">Workspace Members</label>
+            <div id="members-list" class="space-y-2 text-xs">
+              <!-- Loaded via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOADING & PROCESSING INDICATOR OVERLAY -->
+    <div id="loader-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 hidden">
+      <div class="glass-panel p-6 rounded-2xl border border-glass-border flex flex-col items-center justify-center space-y-4 max-w-sm text-center">
+        <div class="relative w-16 h-16 flex items-center justify-center">
+          <div class="absolute inset-0 rounded-full border-2 border-brand-purple/20 animate-ping"></div>
+          <div class="w-10 h-10 rounded-full bg-zinc-950 border border-brand-purple flex items-center justify-center">
+            <i data-lucide="brain-circuit" class="w-5 h-5 text-brand-purpleLight animate-pulse"></i>
+          </div>
+        </div>
+        <span class="text-[10px] font-mono tracking-widest text-brand-cyan">PROCESSING MEMORY</span>
+        <p id="loader-message" class="text-xs text-zinc-300 font-medium">Querying Hindsight experience networks...</p>
+      </div>
+    </div>
+
+    <!-- MODAL: CREATE WORKSPACE -->
+    <div id="modal-create-workspace" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+      <div class="w-full max-w-md glass-panel p-6 rounded-2xl border border-glass-border space-y-4">
+        <div class="flex justify-between items-center">
+          <h3 class="text-sm font-bold text-white uppercase">Create New Workspace</h3>
+          <button onclick="closeCreateWorkspaceModal()" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <form onsubmit="handleCreateWorkspaceSubmit(event)" class="space-y-3.5">
+          <div class="space-y-1">
+            <label class="text-[9px] font-mono text-zinc-400">WORKSPACE NAME</label>
+            <input type="text" id="new-ws-name" required class="w-full bg-white/2 border border-white/8 rounded-lg px-3 py-2 text-xs text-white">
+          </div>
+          <div class="space-y-1">
+            <label class="text-[9px] font-mono text-zinc-400">INDUSTRY</label>
+            <input type="text" id="new-ws-industry" class="w-full bg-white/2 border border-white/8 rounded-lg px-3 py-2 text-xs text-white" placeholder="SaaS, E-Commerce, etc.">
+          </div>
+          <button type="submit" class="w-full py-2.5 rounded-lg bg-gradient-to-r from-brand-purple to-indigo-600 font-bold text-xs hover:shadow-glow-purple transition-all">
+            CREATE WORKSPACE
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: CREATE TASK -->
+    <div id="modal-create-task" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+      <div class="w-full max-w-md glass-panel p-6 rounded-2xl border border-glass-border space-y-4">
+        <div class="flex justify-between items-center">
+          <h3 class="text-sm font-bold text-white uppercase">Add Action Task</h3>
+          <button onclick="closeCreateTaskModal()" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <form onsubmit="handleCreateTaskSubmit(event)" class="space-y-3">
+          <div class="space-y-1">
+            <label class="text-[8px] font-mono text-zinc-500">TASK CONTENT</label>
+            <input type="text" id="new-task-content" required class="w-full bg-white/2 border border-white/8 rounded-lg px-3 py-2 text-xs text-white">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="text-[8px] font-mono text-zinc-500">OWNER ASSIGNEE</label>
+              <input type="text" id="new-task-owner" class="w-full bg-white/2 border border-white/8 rounded-lg px-3 py-2 text-xs text-white" placeholder="Name">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[8px] font-mono text-zinc-500">DEADLINE DATE</label>
+              <input type="date" id="new-task-deadline" class="w-full bg-white/2 border border-white/8 rounded-lg px-3 py-2 text-xs text-white font-mono">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="text-[8px] font-mono text-zinc-500">CLIENT / CUSTOMER</label>
+              <select id="new-task-customer" class="w-full bg-zinc-900 border border-white/8 rounded-lg px-3 py-2 text-xs text-white">
+                <!-- Loaded via JS -->
+              </select>
+            </div>
+            <div class="space-y-1">
+              <label class="text-[8px] font-mono text-zinc-500">PRIORITY</label>
+              <select id="new-task-priority" class="w-full bg-zinc-900 border border-white/8 rounded-lg px-3 py-2 text-xs text-white">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="w-full py-2.5 rounded-lg bg-gradient-to-r from-brand-purple to-indigo-600 font-bold text-xs transition-all">
+            CREATE TASK
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== FRONTEND APPLICATION ROUTER SCRIPT ==================== -->
+  <script>
+    const API_HOST = "http://127.0.0.1:8000";
+    let activeView = "landing";
+    let meetingsList = [];
+    let customersList = [];
+    let activeWorkspaceId = "";
+    let sessionUser = null;
+    let wowTab = "drift";
+
+    // Dynamic header token appender
+    function getAuthHeaders() {
+      const token = localStorage.getItem("memomeet_token");
+      const headers = { "Content-Type": "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      if (activeWorkspaceId) {
+        headers["X-Workspace-Id"] = activeWorkspaceId;
+      }
+      return headers;
+    }
+
+    // Setup active state for navigation links
+    function renderSidebarNav() {
+      const items = [
+        { name: "Dashboard", id: "dashboard", icon: "layout-dashboard" },
+        { name: "Upload Meeting", id: "upload", icon: "upload-cloud" },
+        { name: "Meeting Recorder", id: "recorder", icon: "mic" },
+        { name: "Meeting History", id: "history", icon: "history" },
+        { name: "Customer Timeline", id: "timeline", icon: "trending-up" },
+        { name: "Truth Verification", id: "truth-verification", icon: "search-code" },
+        { name: "AI Assistant", id: "assistant", icon: "bot" },
+        { name: "Customer Intelligence", id: "customer-intelligence", icon: "network" },
+        { name: "Action Tracker", id: "actions", icon: "list-todo" },
+        { name: "Hackathon WoW Features", id: "wow", icon: "sparkles" },
+        { name: "Settings", id: "settings", icon: "settings" },
+      ];
+
+      const navContainer = document.getElementById("nav-links");
+      navContainer.innerHTML = items.map(item => {
+        const isActive = activeView === item.id;
+        return `
+          <button onclick="navigate('${item.id}')" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all group relative ${
+            isActive ? "bg-brand-purple/10 text-white border-l-2 border-brand-purple" : "text-zinc-400 hover:text-white hover:bg-white/5"
+          }">
+            <i data-lucide="${item.icon}" class="w-4 h-4 ${isActive ? 'text-brand-cyan' : 'text-zinc-500'}"></i>
+            <span>${item.name}</span>
+            ${isActive ? '<span class="absolute right-3 w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse"></span>' : ''}
+          </button>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    // Navigation router
+    async function navigate(viewId) {
+      const publicViews = ["landing", "login", "register", "verify-email", "forgot-password"];
+      const isPublic = publicViews.includes(viewId);
+      
+      // Authentication Gatekeeper
+      const token = localStorage.getItem("memomeet_token");
+      if (!token && !isPublic) {
+        navigate("login");
+        return;
+      }
+
+      // Hide all views
+      document.querySelectorAll("main > section").forEach(sec => sec.classList.add("hidden"));
+      
+      activeView = viewId;
+      
+      const sidebar = document.getElementById("sidebar-container");
+      const globalHeader = document.getElementById("global-header");
+      
+      if (isPublic) {
+        sidebar.classList.add("hidden");
+        globalHeader.classList.add("hidden");
+      } else {
+        sidebar.classList.remove("hidden");
+        globalHeader.classList.remove("hidden");
+        renderSidebarNav();
+        loadAlerts(); // Poll alerts in background
+      }
+
+      // Show view
+      const target = document.getElementById(`view-${viewId}`);
+      if (target) target.classList.remove("hidden");
+
+      // Fetch dynamic data based on view
+      if (viewId === "dashboard") loadDashboardData();
+      else if (viewId === "upload") loadUploadDropdowns();
+      else if (viewId === "history") loadHistoryData();
+      else if (viewId === "timeline") loadTimelineDropdown();
+      else if (viewId === "customer-intelligence") loadGraphDropdown();
+      else if (viewId === "settings") loadSettingsData();
+      else if (viewId === "actions") loadTasksData();
+      else if (viewId === "wow") loadWoWDropdown();
+
+      lucide.createIcons();
+    }
+
+    // AUTH ACTIONS
+    async function checkAuthSession() {
+      const token = localStorage.getItem("memomeet_token");
+      if (!token) {
+        navigate("landing");
+        return;
+      }
+      try {
+        const res = await fetch(`${API_HOST}/api/auth/me`, {
+          headers: getAuthHeaders()
+        });
+        if (res.ok) {
+          sessionUser = await res.json();
+          document.getElementById("user-name").innerText = sessionUser.full_name;
+          document.getElementById("user-designation").innerText = sessionUser.designation || "Collaborator";
+          document.getElementById("user-avatar").innerText = sessionUser.full_name.charAt(0);
+          
+          await loadWorkspaces();
+          navigate("dashboard");
+        } else {
+          localStorage.removeItem("memomeet_token");
+          navigate("login");
+        }
+      } catch (err) {
+        console.error("Session verification failed. Operating offline fallback.");
+        navigate("dashboard"); // Test environment bypass
+      }
+    }
+
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById("login-email").value;
+      const password = document.getElementById("login-password").value;
+      
+      showLoader("Authenticating credentials...");
+      try {
+        const res = await fetch(`${API_HOST}/api/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        hideLoader();
+        if (res.ok) {
+          localStorage.setItem("memomeet_token", data.token);
+          sessionUser = data.user;
+          document.getElementById("user-name").innerText = sessionUser.full_name;
+          document.getElementById("user-designation").innerText = sessionUser.designation || "Collaborator";
+          document.getElementById("user-avatar").innerText = sessionUser.full_name.charAt(0);
+          
+          await loadWorkspaces();
+          // Check if they need onboarding (i.e. only has one default workspace name matching workspace rule)
+          if (!activeWorkspaceId) {
+            navigate("onboarding");
+          } else {
+            navigate("dashboard");
+          }
+        } else {
+          alert(data.detail || "Authentication failed.");
+        }
+      } catch (err) {
+        hideLoader();
+        alert("Server communication error.");
+      }
+    }
+
+    async function handleRegisterSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById("reg-name").value;
+      const email = document.getElementById("reg-email").value;
+      const company = document.getElementById("reg-company").value;
+      const designation = document.getElementById("reg-designation").value;
+      const password = document.getElementById("reg-password").value;
+      
+      if (password.length < 6) {
+        alert("Password must be at least 6 characters.");
+        return;
+      }
+
+      showLoader("Spinning corporate brain node...");
+      try {
+        const res = await fetch(`${API_HOST}/api/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ full_name: name, email, company_name: company, designation, password })
+        });
+        const data = await res.json();
+        hideLoader();
+        if (res.ok) {
+          localStorage.setItem("memomeet_token", data.token);
+          sessionUser = data.user;
+          navigate("verify-email");
+        } else {
+          alert(data.detail || "Registration failed.");
+        }
+      } catch (err) {
+        hideLoader();
+        alert("Network error.");
+      }
+    }
+
+    async function handleVerifyEmailSubmit(e) {
+      e.preventDefault();
+      const code = document.getElementById("verify-code").value;
+      if (!code) return;
+      
+      showLoader("Validating OTP code...");
+      try {
+        const res = await fetch(`${API_HOST}/api/auth/verify-email`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: sessionUser.email, code })
+        });
+        hideLoader();
+        if (res.ok) {
+          navigate("onboarding");
+        } else {
+          alert("Invalid validation code.");
+        }
+      } catch (err) {
+        hideLoader();
+        alert("Communication failed.");
+      }
+    }
+
+    async function handleForgotPasswordSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById("forgot-email").value;
+      
+      showLoader("Retrieving recovery options...");
+      try {
+        const res = await fetch(`${API_HOST}/api/auth/forgot-password`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+        hideLoader();
+        if (res.ok) {
+          alert("Password reset instructions sent to email.");
+          navigate("login");
+        } else {
+          alert("Email address not found.");
+        }
+      } catch (err) {
+        hideLoader();
+        alert("Server error.");
+      }
+    }
+
+    async function handleOnboardingSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById("onboard-team").value;
+      const industry = document.getElementById("onboard-industry").value;
+      const size = document.getElementById("onboard-size").value;
+      const usecase = document.getElementById("onboard-usecase").value;
+      
+      showLoader("Building workspace dashboard...");
+      try {
+        const res = await fetch(`${API_HOST}/api/workspaces/onboard`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ company_name: name, industry, team_size: size, use_case: usecase })
+        });
+        const data = await res.json();
+        hideLoader();
+        if (res.ok) {
+          await loadWorkspaces();
+          activeWorkspaceId = data.workspace_id;
+          localStorage.setItem("memomeet_active_workspace", activeWorkspaceId);
+          navigate("dashboard");
+        } else {
+          alert("Failed to build workspace.");
+        }
+      } catch (err) {
+        hideLoader();
+        alert("Network error.");
+      }
+    }
+
+    async function handleLogout() {
+      await fetch(`${API_HOST}/api/auth/logout`, {
+        method: "POST",
+        headers: getAuthHeaders()
+      });
+      localStorage.removeItem("memomeet_token");
+      localStorage.removeItem("memomeet_active_workspace");
+      sessionUser = null;
+      activeWorkspaceId = "";
+      navigate("landing");
+    }
+
+
+    // WORKSPACES ACTIONS
+    async function loadWorkspaces() {
+      try {
+        const res = await fetch(`${API_HOST}/api/workspaces`, {
+          headers: getAuthHeaders()
+        });
+        if (res.ok) {
+          const list = await res.json();
+          const select = document.getElementById("sidebar-workspace-select");
+          select.innerHTML = list.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+          
+          const stored = localStorage.getItem("memomeet_active_workspace");
+          if (stored && list.some(w => w.id === stored)) {
+            activeWorkspaceId = stored;
+            select.value = stored;
+          } else if (list.length > 0) {
+            activeWorkspaceId = list[0].id;
+            select.value = list[0].id;
+            localStorage.setItem("memomeet_active_workspace", activeWorkspaceId);
+          }
+        }
+      } catch (err) {
+        console.error("Could not load workspaces.");
+      }
+    }
+
+    async function changeActiveWorkspace() {
+      const select = document.getElementById("sidebar-workspace-select");
+      activeWorkspaceId = select.value;
+      localStorage.setItem("memomeet_active_workspace", activeWorkspaceId);
+      navigate(activeView); // Reload active view
+    }
+
+    function openCreateWorkspaceModal() {
+      document.getElementById("modal-create-workspace").classList.remove("hidden");
+    }
+
+    function closeCreateWorkspaceModal() {
+      document.getElementById("modal-create-workspace").classList.add("hidden");
+    }
+
+    async function handleCreateWorkspaceSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById("new-ws-name").value;
+      const industry = document.getElementById("new-ws-industry").value;
+      
+      showLoader("Provisioning new workspace...");
+      try {
+        const res = await fetch(`${API_HOST}/api/workspaces`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ name, industry })
+        });
+        const data = await res.json();
+        hideLoader();
+        closeCreateWorkspaceModal();
+        if (res.ok) {
+          await loadWorkspaces();
+          activeWorkspaceId = data.id;
+          localStorage.setItem("memomeet_active_workspace", activeWorkspaceId);
+          document.getElementById("sidebar-workspace-select").value = activeWorkspaceId;
+          navigate("dashboard");
+        } else {
+          alert(data.detail || "Failed to create workspace.");
+        }
+      } catch (err) {
+        hideLoader();
+        alert("Server error.");
+      }
+    }
+
+
+    // DYNAMIC DATA LOADERS
+    async function loadDashboardData() {
+      showLoader("Retrieving memory workspace values...");
+      try {
+        const [meetingsRes, customersRes, contraRes, risksRes, healthRes] = await Promise.all([
+          fetch(`${API_HOST}/api/meetings`, { headers: getAuthHeaders() }).then(r => r.json()),
+          fetch(`${API_HOST}/api/customers`, { headers: getAuthHeaders() }).then(r => r.json()),
+          fetch(`${API_HOST}/api/contradictions`, { headers: getAuthHeaders() }).then(r => r.json()),
+          fetch(`${API_HOST}/api/predictions`, { headers: getAuthHeaders() }).then(r => r.json()),
+          fetch(`${API_HOST}/api/health-score`, { headers: getAuthHeaders() }).then(r => r.json()),
+        ]);
+
+        // Calculate averages
+        const avgIq = meetingsRes.length ? Math.round(meetingsRes.reduce((s, m) => s + m.iq_score, 0) / meetingsRes.length) : 0;
+        
+        // Calculate open tasks count
+        const tasksRes = await fetch(`${API_HOST}/api/tasks`, { headers: getAuthHeaders() }).then(r => r.json());
+        const openTasksCount = tasksRes.filter(t => t.status === 'open' || t.status === 'in_progress').length;
+
+        const stats = [
+          { name: "TOTAL MEETINGS", value: meetingsRes.length, icon: "message-square", color: "text-brand-cyan" },
+          { name: "MEMORY HEALTH", value: `${healthRes.score}%`, icon: "activity", color: "text-emerald-400" },
+          { name: "CUSTOMERS", value: customersRes.length, icon: "users", color: "text-indigo-400" },
+          { name: "CONTRADICTIONS", value: contraRes.length, icon: "shield-alert", color: "text-rose-400" },
+          { name: "OPEN RISKS", value: risksRes.filter(r => r.risk_level === 'high').length, icon: "alert-triangle", color: "text-rose-500" },
+          { name: "OPEN ACTIONS", value: openTasksCount, icon: "list-todo", color: "text-brand-purpleLight" },
+        ];
+        
+        document.getElementById("health-value").innerText = `${healthRes.score}%`;
+        document.getElementById("health-bar").style.width = `${healthRes.score}%`;
+
+        document.getElementById("dashboard-stats-grid").innerHTML = stats.map(st => `
+          <div class="glass-panel p-4 rounded-xl border border-glass-border space-y-1">
+            <span class="text-[9px] text-zinc-500 font-mono block">${st.name}</span>
+            <div class="flex items-baseline justify-between">
+              <span class="text-xl font-bold font-mono text-white">${st.value}</span>
+              <i data-lucide="${st.icon}" class="w-4 h-4 ${st.color}"></i>
+            </div>
+          </div>
+        `).join('');
+
+        // Render Recent Meetings
+        const recent = meetingsRes.slice(0, 3);
+        document.getElementById("recent-meetings-list").innerHTML = recent.map(m => `
+          <div onclick="navigateHistoryTo('${m.id}')" class="flex items-center justify-between p-3 rounded-lg bg-white/2 hover:bg-white/5 border border-white/5 transition-all cursor-pointer group">
+            <div class="space-y-0.5">
+              <h4 class="text-xs font-bold text-zinc-200 group-hover:text-white truncate max-w-[150px]">${m.title}</h4>
+              <p class="text-[9px] text-zinc-500 font-mono">${m.meeting_date} • ${m.customer_name}</p>
+            </div>
+            <span class="text-[10px] font-mono text-brand-cyan">IQ: ${m.iq_score}</span>
+          </div>
+        `).join('');
+
+        // Render Dashboard Contradictions
+        document.getElementById("dashboard-contradictions-container").innerHTML = contraRes.length === 0 ? `
+          <div class="glass-panel p-8 rounded-xl border border-glass-border text-center space-y-1">
+            <span class="text-xs font-mono text-zinc-400 block">NO CONTRADICTIONS DETECTED</span>
+            <p class="text-[10px] text-zinc-600">The organizational memory is 100% aligned with historical agreements.</p>
+          </div>
+        ` : contraRes.map(c => `
+          <div class="glass-panel border-l-4 border-l-rose-500 rounded-xl p-4.5 space-y-3 relative">
+            <button onclick="resolveContradiction('${c.id}')" class="absolute right-4 top-4 px-2.5 py-1 rounded bg-white/5 border border-white/10 text-[9px] font-mono text-zinc-400 hover:text-white transition-all">RESOLVE</button>
+            <div class="flex justify-between items-center">
+              <span class="text-[10px] font-mono font-bold text-zinc-400 uppercase">${c.customer_name}</span>
+              <span class="text-[9px] font-mono px-2 py-0.5 bg-rose-500/10 text-rose-400 rounded-full border border-rose-500/20 mr-16">HIGH CONTRADICTION</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs bg-white/1 p-3 rounded-lg">
+              <div>
+                <p class="text-[10px] text-zinc-500">${c.meeting_date_a} • ${c.speaker_a}</p>
+                <p class="italic text-zinc-300">"${c.statement_a}"</p>
+              </div>
+              <div class="border-l border-white/5 pl-4">
+                <p class="text-[10px] text-zinc-500">${c.meeting_date_b} • ${c.speaker_b}</p>
+                <p class="italic text-zinc-200">"${c.statement_b}"</p>
+              </div>
+            </div>
+            <div class="bg-brand-purple/5 p-2 rounded text-xs text-zinc-300">
+              <strong>AI MEMORY AUDIT:</strong> ${c.explanation}
+            </div>
+          </div>
+        `).join('');
+
+        // Render Dashboard Risks
+        document.getElementById("dashboard-risks-container").innerHTML = risksRes.length === 0 ? `
+          <div class="col-span-2 glass-panel p-8 rounded-xl border border-glass-border text-center">
+            <span class="text-xs font-mono text-zinc-400">NO RISKS PREDICTED</span>
+          </div>
+        ` : risksRes.slice(0, 2).map(r => `
+          <div class="glass-panel p-4.5 rounded-xl border border-glass-border space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-[10px] font-mono tracking-widest text-brand-purpleLight uppercase">${r.category}</span>
+              <span class="text-[9px] font-mono px-2 py-0.5 bg-rose-500/10 text-rose-400 rounded-full">${r.risk_level.toUpperCase()} RISK (${Math.round(r.probability*100)}%)</span>
+            </div>
+            <div class="text-xs space-y-1.5">
+              <h4 class="font-bold text-white">${r.impact}</h4>
+              <p class="text-zinc-500"><strong class="text-[9px] font-mono">MITIGATION:</strong> ${r.mitigation}</p>
+            </div>
+          </div>
+        `).join('');
+
+        lucide.createIcons();
+      } catch (err) {
+        console.error(err);
+      } finally {
+        hideLoader();
+      }
+    }
+
+    function navigateHistoryTo(id) {
+      navigate('history');
+      setTimeout(() => {
+        fetchMeetingDetail(id);
+      }, 200);
+    }
+
+    async function loadUploadDropdowns() {
+      try {
+        const res = await fetch(`${API_HOST}/api/customers`, { headers: getAuthHeaders() });
+        const list = await res.ok ? await res.json() : [];
+        document.getElementById("upload-customer").innerHTML = list.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      } catch (e) {}
+    }
+
+    async function resolveContradiction(id) {
+      if (!confirm("Resolve contradiction?")) return;
+      try {
+        const res = await fetch(`${API_HOST}/api/contradictions/${id}/resolve`, {
+          method: "POST",
+          headers: getAuthHeaders()
+        });
+        if (res.ok) {
+          loadDashboardData();
+        }
+      } catch (e) {}
+    }
+
+
+    // MEETING HISTORY
+    async function loadHistoryData() {
+      try {
+        const res = await fetch(`${API_HOST}/api/meetings`, { headers: getAuthHeaders() });
+        const data = await res.json();
+        meetingsList = data;
+
+        const listContainer = document.getElementById("history-meetings-list");
+        listContainer.innerHTML = data.length === 0 ? `
+          <span class="text-xs font-mono text-zinc-500 block p-2">No meetings indexed yet.</span>
+        ` : data.map(m => `
+          <div onclick="fetchMeetingDetail('${m.id}')" class="p-3 rounded-lg border bg-white/2 hover:bg-white/4 border-white/5 cursor-pointer text-left space-y-1">
+            <h4 class="text-xs font-bold text-white truncate">${m.title}</h4>
+            <div class="flex justify-between items-center text-[9px] font-mono text-zinc-500">
+              <span>${m.meeting_date}</span>
+              <span class="text-brand-cyan">IQ: ${m.iq_score}</span>
+            </div>
+          </div>
+        `).join('');
+
+        if (data.length > 0) {
+          fetchMeetingDetail(data[0].id);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function fetchMeetingDetail(id) {
+      const detailContainer = document.getElementById("history-detail-panel");
+      detailContainer.innerHTML = `<div class="skeleton h-44 w-full"></div>`;
+      
+      try {
+        const res = await fetch(`${API_HOST}/api/meetings/${id}`, { headers: getAuthHeaders() });
+        const m = await res.json();
+
+        detailContainer.innerHTML = `
+          <!-- Header block -->
+          <div class="glass-panel p-5 rounded-2xl border border-glass-border space-y-2">
+            <span class="text-[9px] font-mono text-zinc-500 uppercase block">Client: ${m.customer_name}</span>
+            <h3 class="text-base font-bold text-white">${m.title}</h3>
+            <div class="flex items-center gap-4 text-[10px] font-mono text-zinc-400">
+              <span>Date: ${m.meeting_date}</span>
+              <span>Duration: ${Math.round(m.duration_seconds/60)} mins</span>
+            </div>
+          </div>
+
+          <!-- Meeting IQ gauge -->
+          <div class="glass-panel p-5 rounded-2xl border border-glass-border flex flex-col md:flex-row items-center gap-6">
+            <div class="relative w-28 h-28 flex flex-col items-center justify-center border-4 border-brand-purple/20 rounded-full shrink-0">
+              <span class="text-2xl font-black font-mono text-white">${m.iq_score}</span>
+              <span class="text-[8px] font-mono tracking-widest text-brand-cyan mt-0.5">MEETING IQ</span>
+            </div>
+            <div class="flex-1 space-y-3">
+              <h4 class="text-xs font-bold text-white">IQ Analysis Insights</h4>
+              <div class="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                <div class="bg-white/2 p-2 rounded">Clarity: ${m.iq_breakdown.clarity}%</div>
+                <div class="bg-white/2 p-2 rounded">Decision Quality: ${m.iq_breakdown.decision_quality}%</div>
+                <div class="bg-white/2 p-2 rounded">Stakeholder Value: ${m.iq_breakdown.stakeholder_participation}%</div>
+                <div class="bg-white/2 p-2 rounded">Completions: ${m.iq_breakdown.action_completeness}%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transcript Dialogues -->
+          <div class="glass-panel p-5 rounded-2xl border border-glass-border space-y-3">
+            <span class="text-[10px] font-mono text-zinc-500 uppercase block">Transcript Dialogue</span>
+            <div class="space-y-3 max-h-[30vh] overflow-y-auto pr-2">
+              ${m.transcript.map(line => `
+                <div class="bg-white/1 p-3 rounded-lg border border-white/2 text-xs space-y-1">
+                  <span class="font-bold text-zinc-200 block">${line.speaker}</span>
+                  <p class="text-zinc-400 leading-normal">${line.text}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+
+    // TIMELINE
+    async function loadTimelineDropdown() {
+      try {
+        const res = await fetch(`${API_HOST}/api/customers`, { headers: getAuthHeaders() });
+        const data = await res.json();
+        customersList = data;
+        
+        const dropdown = document.getElementById("timeline-customer-select");
+        dropdown.innerHTML = data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        
+        loadCustomerTimeline();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadCustomerTimeline() {
+      const cid = document.getElementById("timeline-customer-select").value;
+      if (!cid) return;
+      const timelineContainer = document.getElementById("timeline-events-container");
+      timelineContainer.innerHTML = `<div class="skeleton h-24 w-full"></div>`;
+
+      try {
+        const res = await fetch(`${API_HOST}/api/customers/${cid}/timeline`, { headers: getAuthHeaders() });
+        const data = await res.json();
+        
+        timelineContainer.innerHTML = `
+          <div class="absolute left-4.5 top-0 bottom-0 w-0.5 bg-zinc-800 pointer-events-none"></div>
+          ${data.timeline.length === 0 ? `
+            <span class="text-xs font-mono text-zinc-500 block">No chronological timelines logged yet.</span>
+          ` : data.timeline.map(event => `
+            <div class="relative pl-6 space-y-3">
+              <span class="absolute left-3 w-3 h-3 rounded-full bg-brand-purple border border-black top-2"></span>
+              <div class="glass-panel p-4 rounded-xl border border-glass-border space-y-2">
+                <div class="flex justify-between items-center text-[10px] font-mono text-zinc-500">
+                  <span>Date: ${event.date}</span>
+                  <span class="text-brand-cyan">IQ Score: ${event.iq_score}</span>
+                </div>
+                <h4 class="text-xs font-bold text-white">${event.title}</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 text-[11px]">
+                  <div>
+                    <span class="text-[9px] font-mono text-emerald-400 uppercase font-bold block">Decisions Logged</span>
+                    <ul class="list-disc pl-4 text-zinc-400 space-y-1">
+                      ${event.decisions.length === 0 ? `<li>No decisions in meeting.</li>` : event.decisions.map(d => `<li>${d}</li>`).join('')}
+                    </ul>
+                  </div>
+                  <div>
+                    <span class="text-[9px] font-mono text-indigo-400 uppercase font-bold block">Requirements Logged</span>
+                    <ul class="list-disc pl-4 text-zinc-400 space-y-1">
+                      ${event.requirements.length === 0 ? `<li>No requirements added.</li>` : event.requirements.map(r => `<li>${r}</li>`).join('')}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        `;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+
+    // GRAPHS
+    async function loadGraphDropdown() {
+      try {
+        const res = await fetch(`${API_HOST}/api/customers`, { headers: getAuthHeaders() });
+        const data = await res.json();
+        const dropdown = document.getElementById("graph-customer-select");
+        dropdown.innerHTML = data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        
+        loadCustomerGraph();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadCustomerGraph() {
+      const cid = document.getElementById("graph-customer-select").value;
+      if (!cid) return;
+      const graphContainer = document.getElementById("graph-svg-container");
+      graphContainer.innerHTML = `<div class="skeleton h-full w-full"></div>`;
+
+      try {
+        const res = await fetch(`${API_HOST}/api/customers/${cid}/graph`, { headers: getAuthHeaders() });
+        const data = await res.json();
+
+        const width = 800;
+        const height = 400;
+        const cx = width / 2;
+        const cy = height / 2;
+
+        const nodes = data.nodes || [];
+        const edges = data.edges || [];
+
+        nodes.forEach((n, idx) => {
+          if (n.type === 'customer') {
+            n.x = cx;
+            n.y = cy;
+          } else {
+            let r = 130;
+            if (n.type === 'meeting') r = 70;
+            const angle = (idx / (nodes.length - 1)) * 2 * Math.PI;
+            n.x = cx + r * Math.cos(angle);
+            n.y = cy + r * Math.sin(angle);
+          }
+        });
+
+        const lineSvgs = edges.map(edge => {
+          const sNode = nodes.find(n => n.id === edge.source);
+          const tNode = nodes.find(n => n.id === edge.target);
+          if (!sNode || !tNode) return '';
+          return `<line x1="${sNode.x}" y1="${sNode.y}" x2="${tNode.x}" y2="${tNode.y}" stroke="rgba(255,255,255,0.06)" stroke-width="1.5" />`;
+        }).join('');
+
+        const nodeSvgs = nodes.map(n => {
+          let fill = 'rgba(112, 0, 255, 0.2)';
+          let stroke = '#7000ff';
+          let r = n.type === 'customer' ? 22 : 14;
+
+          if (n.type === 'meeting') { fill = 'rgba(0, 245, 255, 0.1)'; stroke = '#00f5ff'; }
+          else if (n.type === 'decision') { fill = 'rgba(16, 185, 129, 0.1)'; stroke = '#10b981'; }
+          else if (n.type === 'requirement') { fill = 'rgba(99, 102, 241, 0.1)'; stroke = '#6366f1'; }
+          else if (n.type === 'risk') { fill = 'rgba(239, 68, 68, 0.1)'; stroke = '#ef4444'; }
+
+          return `
+            <g class="cursor-pointer" onclick="showNodeInspectInfo('${n.id}')">
+              <circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="2" />
+              <text x="${n.x}" y="${n.y + r + 10}" text-anchor="middle" fill="#9ca3af" font-size="8" font-family="monospace">${n.label}</text>
+            </g>
+          `;
+        }).join('');
+
+        graphContainer.innerHTML = `
+          <svg class="w-full h-full" viewBox="0 0 ${width} ${height}">
+            ${lineSvgs}
+            ${nodeSvgs}
+          </svg>
+          <div id="graph-inspector-panel" class="absolute bottom-4 left-4 right-4 glass-panel p-4 rounded-xl border border-glass-border hidden max-w-sm"></div>
+        `;
+
+        window.graphNodes = nodes;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+
+    // TRUTH VERIFICATION SEARCH
+    async function runTruthQuery(e) {
+      if (e) e.preventDefault();
+      const txt = document.getElementById("truth-input").value;
+      if (!txt) return;
+
+      showLoader("Retrieving audit logs...");
+      try {
+        const res = await fetch(`${API_HOST}/api/truth-verification`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ query: txt, customer_id: "acme-corp" })
+        });
+        const data = await res.json();
+        
+        document.getElementById("truth-results-panel").classList.remove("hidden");
+        document.getElementById("truth-direct-answer").innerText = data.direct_answer;
+
+        const stack = document.getElementById("truth-evidence-stack");
+        stack.innerHTML = data.evidence_cards.length === 0 ? `
+          <div class="glass-panel p-4 text-center text-xs text-zinc-500">No matching text logs found.</div>
+        ` : data.evidence_cards.map(card => `
+          <div class="glass-panel p-4 rounded-xl border border-glass-border space-y-2 relative overflow-hidden">
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="text-xs font-bold text-white">${card.meeting_title}</h4>
+                <span class="text-[9px] font-mono text-zinc-500">${card.meeting_date} • ${card.speaker}</span>
+              </div>
+              <span class="text-[10px] font-mono text-brand-cyan">${Math.round(card.confidence_level*100)}% Match</span>
+            </div>
+            <p class="text-xs italic text-zinc-300 highlight-evidence p-2.5 rounded-r">"${card.text_excerpt}"</p>
+          </div>
+        `).join('');
+
+        lucide.createIcons();
+      } catch (err) {
+        console.error(err);
+      } finally {
+        hideLoader();
+      }
+    }
+
+
+    // ALERTS NOTIFICATIONS
+    async function loadAlerts() {
+      try {
+        const res = await fetch(`${API_HOST}/api/alerts`, { headers: getAuthHeaders() });
+        if (!res.ok) return;
+        const list = await res.json();
+        
+        const badge = document.getElementById("alert-badge");
+        if (list.length > 0) {
+          badge.classList.remove("hidden");
+        } else {
+          badge.classList.add("hidden");
+        }
+        
+        document.getElementById("alert-tray-count").innerText = `${list.length} notifications`;
+        
+        const listContainer = document.getElementById("alert-tray-list");
+        listContainer.innerHTML = list.length === 0 ? `
+          <span class="text-[10px] text-zinc-500 font-mono block text-center py-4">All engine targets aligned.</span>
+        ` : list.map(a => {
+          let icon = "info";
+          let color = "text-brand-cyan";
+          if (a.type === 'contradiction') { icon = "shield-alert"; color = "text-rose-500"; }
+          else if (a.type === 'deadline') { icon = "clock"; color = "text-amber-400"; }
+          else if (a.type === 'risk_increase') { icon = "alert-triangle"; color = "text-rose-400"; }
+          
+          return `
+            <div class="p-2.5 bg-white/2 rounded-xl border border-white/5 flex gap-2.5 items-start">
+              <i data-lucide="${icon}" class="w-4 h-4 ${color} shrink-0 mt-0.5"></i>
+              <div class="space-y-0.5 leading-none">
+                <span class="text-[9px] font-mono text-zinc-500 font-bold block">${a.title}</span>
+                <p class="text-[11px] text-zinc-300">${a.message}</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+        lucide.createIcons();
+      } catch (e) {}
+    }
+
+    function toggleAlertCenterTray() {
+      const tray = document.getElementById("alert-tray");
+      tray.classList.toggle("hidden");
+    }
+
+
+    // GLOBAL SEARCH
+    async function handleGlobalSearch(e) {
+      const query = document.getElementById("global-search-input").value;
+      const dropdown = document.getElementById("search-dropdown");
+      
+      if (!query || query.length < 2) {
+        dropdown.classList.add("hidden");
+        return;
+      }
+      
+      try {
+        const res = await fetch(`${API_HOST}/api/search?q=${query}`, { headers: getAuthHeaders() });
+        const data = await res.json();
+        
+        dropdown.classList.remove("hidden");
+        if (data.results.length === 0) {
+          dropdown.innerHTML = `<span class="text-zinc-500 p-2 block text-center">No matches found.</span>`;
+          return;
+        }
+        
+        dropdown.innerHTML = data.results.map(item => `
+          <div onclick="clickSearchResult('${item.id}', '${item.type}')" class="p-2 hover:bg-white/5 rounded-lg cursor-pointer border-b border-white/2 last:border-b-0 text-left">
+            <div class="flex justify-between items-center text-[9px] font-mono mb-0.5">
+              <span class="text-brand-purpleLight font-bold uppercase">${item.type}</span>
+              ${item.date ? `<span class="text-zinc-500">${item.date}</span>` : ''}
+            </div>
+            <p class="text-zinc-200 font-medium truncate">${item.title}</p>
+            ${item.description ? `<p class="text-[10px] text-zinc-500 truncate mt-0.5">${item.description}</p>` : ''}
+          </div>
+        `).join('');
+      } catch (err) {}
+    }
+
+    function clickSearchResult(id, type) {
+      document.getElementById("search-dropdown").classList.add("hidden");
+      document.getElementById("global-search-input").value = "";
+      
+      if (type === 'meeting') {
+        navigateHistoryTo(id);
+      } else if (type === 'customer') {
+        navigate('customer-intelligence');
+      } else if (type === 'task') {
+        navigate('actions');
+      } else {
+        // Go to timeline or history details
+        navigate('history');
+      }
+    }
+
+
+    // ACTION TRACKER (TASKS)
+    async function loadTasksData() {
+      const grid = document.getElementById("tasks-board-grid");
+      grid.innerHTML = `<div class="skeleton h-32 col-span-4"></div>`;
+      
+      try {
+        const res = await fetch(`${API_HOST}/api/tasks`, { headers: getAuthHeaders() });
+        const list = await res.json();
+        
+        // Group tasks by status
+        const columns = {
+          "open": { title: "Open Items", items: [], color: "bg-brand-cyan/20 border-brand-cyan" },
+          "in_progress": { title: "In Progress", items: [], color: "bg-indigo-500/20 border-indigo-500" },
+          "completed": { title: "Completed", items: [], color: "bg-emerald-500/20 border-emerald-500" },
+          "overdue": { title: "Overdue Alerts", items: [], color: "bg-rose-500/20 border-rose-500" }
+        };
+        
+        // Update overdue tasks state based on date comparing dynamically
+        const today = new Date().toISOString().split('T')[0];
+        list.forEach(t => {
+          if (t.status !== 'completed' && t.deadline && t.deadline < today) {
+            columns["overdue"].items.push(t);
+          } else if (columns[t.status]) {
+            columns[t.status].items.push(t);
+          }
+        });
+        
+        grid.innerHTML = Object.keys(columns).map(colKey => {
+          const col = columns[colKey];
+          return `
+            <div class="glass-panel p-4 rounded-xl border border-glass-border space-y-3 flex flex-col min-h-[50vh]">
+              <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                <span class="text-xs font-bold text-white uppercase">${col.title}</span>
+                <span class="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-mono text-zinc-400">${col.items.length}</span>
+              </div>
+              <div class="space-y-2.5 flex-1 overflow-y-auto pr-1">
+                ${col.items.length === 0 ? `
+                  <span class="text-[10px] font-mono text-zinc-600 block text-center py-8">No tasks.</span>
+                ` : col.items.map(t => {
+                  let priorityColor = "text-zinc-500 bg-zinc-800";
+                  if (t.priority === 'high') priorityColor = "text-rose-400 bg-rose-500/10";
+                  else if (t.priority === 'medium') priorityColor = "text-amber-400 bg-amber-500/10";
+                  
+                  return `
+                    <div class="glass-card p-3 rounded-lg border border-white/4 space-y-2 relative group">
+                      <div class="flex justify-between items-start gap-1">
+                        <p class="text-xs text-zinc-200 font-semibold leading-snug">${t.content}</p>
+                      </div>
+                      ${t.customer_name ? `<span class="text-[8px] font-mono text-zinc-500 uppercase font-bold block">${t.customer_name}</span>` : ''}
+                      <div class="flex justify-between items-center pt-1 text-[9px] font-mono">
+                        <span class="px-1.5 py-0.5 rounded ${priorityColor}">${t.priority.toUpperCase()}</span>
+                        <span class="text-zinc-400">${t.owner || 'Unassigned'}</span>
+                      </div>
+                      ${t.deadline ? `<div class="text-[8px] text-zinc-500 font-mono">Due: ${t.deadline}</div>` : ''}
+                      
+                      <!-- Quick action triggers -->
+                      <div class="pt-2 flex justify-end gap-1.5 border-t border-white/2 mt-2">
+                        ${colKey !== 'completed' ? `<button onclick="updateTaskStatus('${t.id}', 'completed')" class="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 hover:text-white rounded text-[8px] font-mono">COMPLETE</button>` : ''}
+                        ${colKey === 'open' ? `<button onclick="updateTaskStatus('${t.id}', 'in_progress')" class="px-1.5 py-0.5 bg-indigo-500/10 text-indigo-400 hover:text-white rounded text-[8px] font-mono">START</button>` : ''}
+                        <button onclick="deleteTask('${t.id}')" class="text-rose-500 hover:text-rose-300 ml-auto p-1"><i data-lucide="trash" class="w-3 h-3"></i></button>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+        lucide.createIcons();
+      } catch (err) {}
+    }
+
+    async function updateTaskStatus(id, status) {
+      try {
+        const res = await fetch(`${API_HOST}/api/tasks/${id}`, {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ status })
+        });
+        if (res.ok) {
+          loadTasksData();
+        }
+      } catch (e) {}
+    }
+
+    async function deleteTask(id) {
+      if (!confirm("Remove task?")) return;
+      try {
+        const res = await fetch(`${API_HOST}/api/tasks/${id}`, {
+          method: "DELETE",
+          headers: getAuthHeaders()
+        });
+        if (res.ok) {
+          loadTasksData();
+        }
+      } catch (e) {}
+    }
+
+    function openCreateTaskModal() {
+      // Populates select customer options in task modal
+      const dropdown = document.getElementById("new-task-customer");
+      dropdown.innerHTML = customersList.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      
+      document.getElementById("modal-create-task").classList.remove("hidden");
+    }
+
+    function closeCreateTaskModal() {
+      document.getElementById("modal-create-task").classList.add("hidden");
+    }
+
+    async function handleCreateTaskSubmit(e) {
+      e.preventDefault();
+      const content = document.getElementById("new-task-content").value;
+      const owner = document.getElementById("new-task-owner").value;
+      const deadline = document.getElementById("new-task-deadline").value;
+      const customer_id = document.getElementById("new-task-customer").value;
+      const priority = document.getElementById("new-task-priority").value;
+      
+      showLoader("Adding action ticket...");
+      try {
+        const res = await fetch(`${API_HOST}/api/tasks`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ content, owner, deadline, customer_id, priority })
+        });
+        hideLoader();
+        closeCreateTaskModal();
+        if (res.ok) {
+          loadTasksData();
+        } else {
+          alert("Failed to create task.");
+        }
+      } catch (err) {
+        hideLoader();
+      }
+    }
+
+
+    // COLLABORATION INVITES
+    async function loadMembersList() {
+      try {
+        const res = await fetch(`${API_HOST}/api/workspaces/${activeWorkspaceId}/members`, { headers: getAuthHeaders() });
+        const list = await res.ok ? await res.json() : [];
+        
+        document.getElementById("members-list").innerHTML = list.map(m => `
+          <div class="flex justify-between items-center p-1.5 rounded bg-white/2">
+            <div>
+              <p class="font-bold text-white leading-none">${m.full_name}</p>
+              <span class="text-[8px] text-zinc-500 font-mono tracking-tight block mt-0.5">${m.email}</span>
+            </div>
+            <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-brand-purple/10 text-brand-purpleLight font-bold uppercase">${m.role}</span>
+          </div>
+        `).join('');
+      } catch (e) {}
+    }
+
+    async function handleInviteSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById("invite-email").value;
+      const role = document.getElementById("invite-role").value;
+      
+      showLoader("Sending invite token...");
+      try {
+        const res = await fetch(`${API_HOST}/api/workspaces/${activeWorkspaceId}/invite`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ email, role })
+        });
+        hideLoader();
+        if (res.ok) {
+          alert("Invite processed successfully.");
+          document.getElementById("invite-email").value = "";
+          loadMembersList();
+        } else {
+          alert("Invite processing failed.");
+        }
+      } catch (err) {
+        hideLoader();
+      }
+    }
+
+
+    // SETTINGS DATA
+    async function loadSettingsData() {
+      loadMembersList();
+      try {
+        const res = await fetch(`${API_HOST}/api/settings`);
+        const data = await res.json();
+        document.getElementById("settings-prompt").value = data.system_prompt;
+      } catch (err) {}
+    }
+
+
+    // HACKATHON WOW TAB SWITCHES
+    async function loadWoWDropdown() {
+      try {
+        const res = await fetch(`${API_HOST}/api/customers`, { headers: getAuthHeaders() });
+        const data = await res.json();
+        customersList = data;
+        
+        const dropdown = document.getElementById("wow-customer-select");
+        dropdown.innerHTML = data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        
+        loadWoWFeatures();
+      } catch (err) {}
+    }
+
+    function switchWoWTab(tabId) {
+      // Deactivate buttons
+      const tabs = ["drift", "commitments", "influence", "trust", "radar"];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (t === tabId) {
+          btn.className = "px-4 py-2.5 text-xs font-bold border-b-2 border-brand-cyan text-brand-cyan transition-all";
+        } else {
+          btn.className = "px-4 py-2.5 text-xs font-semibold text-zinc-400 hover:text-white border-b-2 border-transparent transition-all";
+        }
+      });
+      
+      wowTab = tabId;
+      loadWoWFeatures();
+    }
+
+    async function loadWoWFeatures() {
+      const cid = document.getElementById("wow-customer-select").value;
+      if (!cid) return;
+      
+      const contentPanel = document.getElementById("wow-tab-content");
+      contentPanel.innerHTML = `<div class="skeleton h-44 w-full mt-4"></div>`;
+      
+      try {
+        if (wowTab === "drift") {
+          const res = await fetch(`${API_HOST}/api/wow/drift?customer_id=${cid}`, { headers: getAuthHeaders() });
+          const data = await res.json();
+          
+          contentPanel.innerHTML = `
+            <div class="glass-panel p-5 rounded-2xl border border-glass-border space-y-4 mt-4">
+              <div>
+                <h4 class="text-xs font-bold uppercase text-white flex items-center gap-1.5"><i data-lucide="git-pull-request" class="w-4 h-4 text-brand-cyan"></i> Requirement Drift Timeline</h4>
+                <p class="text-[11px] text-zinc-500 mt-0.5">Chronological drift mapping showing superseded and modified requirements.</p>
+              </div>
+              <div class="relative pl-6 space-y-4">
+                <div class="absolute left-2.5 top-0 bottom-0 w-0.5 bg-zinc-800 pointer-events-none"></div>
+                ${data.timeline.length === 0 ? `<p class="text-xs text-zinc-500 font-mono">No requirements recorded for client.</p>` : data.timeline.map(item => {
+                  let statusBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-mono uppercase">ACTIVE</span>`;
+                  if (item.status === 'changed') {
+                    statusBadge = `<span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[9px] font-mono uppercase">CHANGED DRIFT</span>`;
+                  } else if (item.status === 'superseded') {
+                    statusBadge = `<span class="px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-500 border border-zinc-700 text-[9px] font-mono uppercase">SUPERSEDED</span>`;
+                  }
+                  
+                  return `
+                    <div class="relative pl-4 space-y-1.5">
+                      <span class="absolute left-1.5 w-2 h-2 rounded-full ${item.status === 'changed' ? 'bg-amber-400' : item.status === 'superseded' ? 'bg-zinc-600' : 'bg-emerald-400'} top-2"></span>
+                      <div class="flex items-center gap-3">
+                        <span class="text-[9px] font-mono text-zinc-500">${item.date} • ${item.meeting_title}</span>
+                        ${statusBadge}
+                      </div>
+                      <p class="text-xs text-zinc-200 font-semibold leading-snug">"${item.content}" <span class="text-[10px] text-zinc-500 font-mono">(${item.speaker})</span></p>
+                      ${item.drift_explanation ? `<div class="bg-amber-500/5 p-2 rounded text-[10px] text-amber-300 border border-amber-500/10 font-mono">${item.drift_explanation}</div>` : ''}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }
+        else if (wowTab === "commitments") {
+          const res = await fetch(`${API_HOST}/api/wow/commitments?customer_id=${cid}`, { headers: getAuthHeaders() });
+          const data = await res.json();
+          
+          contentPanel.innerHTML = `
+            <div class="glass-panel p-5 rounded-2xl border border-glass-border space-y-6 mt-4">
+              <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h4 class="text-xs font-bold uppercase text-white flex items-center gap-1.5"><i data-lucide="check-square" class="w-4 h-4 text-emerald-400"></i> Commitment Tracker Metrics</h4>
+                  <p class="text-[11px] text-zinc-500 mt-0.5">Measures promises made in client meetings vs task completions.</p>
+                </div>
+                <div class="flex gap-4">
+                  <div class="bg-white/2 px-3 py-1.5 rounded-lg text-center"><span class="text-[8px] font-mono text-zinc-500 block">TOTAL</span><span class="text-sm font-bold font-mono text-white">${data.total}</span></div>
+                  <div class="bg-white/2 px-3 py-1.5 rounded-lg text-center"><span class="text-[8px] font-mono text-zinc-500 block">MET</span><span class="text-sm font-bold font-mono text-emerald-400">${data.completed}</span></div>
+                  <div class="bg-white/2 px-3 py-1.5 rounded-lg text-center"><span class="text-[8px] font-mono text-zinc-500 block">RATE</span><span class="text-sm font-bold font-mono text-brand-cyan">${data.completion_rate}%</span></div>
+                </div>
+              </div>
+              
+              <!-- Progress bar -->
+              <div class="w-full bg-zinc-800 h-3 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-brand-purple to-brand-cyan rounded-full" style="width: ${data.completion_rate}%"></div>
+              </div>
+              
+              <div class="space-y-2.5">
+                <span class="text-[9px] font-mono text-zinc-500 uppercase block">Promises Log</span>
+                <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  ${data.commitments.length === 0 ? `<p class="text-xs text-zinc-500">No promises recorded.</p>` : data.commitments.map(item => `
+                    <div class="p-2.5 rounded-lg bg-white/2 border border-white/5 flex justify-between items-center text-xs">
+                      <div>
+                        <p class="text-zinc-200 font-semibold">"${item.content}"</p>
+                        <span class="text-[9px] font-mono text-zinc-500">Spoken by: ${item.speaker} • Assignee: ${item.owner || 'Unassigned'}</span>
+                      </div>
+                      <span class="px-2 py-0.5 rounded font-mono text-[9px] ${item.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">${item.status.toUpperCase()}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        else if (wowTab === "influence") {
+          const res = await fetch(`${API_HOST}/api/wow/stakeholders?customer_id=${cid}`, { headers: getAuthHeaders() });
+          const data = await res.json();
+          
+          contentPanel.innerHTML = `
+            <div class="glass-panel p-5 rounded-2xl border border-glass-border space-y-4 mt-4">
+              <div>
+                <h4 class="text-xs font-bold uppercase text-white flex items-center gap-1.5"><i data-lucide="crown" class="w-4 h-4 text-amber-400"></i> Stakeholder Influence Graph</h4>
+                <p class="text-[11px] text-zinc-500 mt-0.5">Identifies decision-makers based on meeting decisions, objections, and dialogue counts.</p>
+              </div>
+              
+              <div class="space-y-3">
+                ${data.stakeholders.length === 0 ? `<p class="text-xs text-zinc-500">No stakeholder details loaded yet.</p>` : data.stakeholders.map(st => `
+                  <div class="space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                      <span class="font-bold text-zinc-200">${st.speaker}</span>
+                      <span class="text-[10px] font-mono font-bold text-brand-cyan">${st.influence_score}% Influence</span>
+                    </div>
+                    <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+                      <div class="h-full bg-brand-cyan" style="width: ${st.influence_score}%"></div>
+                    </div>
+                    <div class="flex gap-4 text-[9px] font-mono text-zinc-500 pt-0.5">
+                      <span>Decisions: ${st.decision_count}</span>
+                      <span>Commitments: ${st.commitment_count}</span>
+                      <span>Objections: ${st.objection_count}</span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+        else if (wowTab === "trust") {
+          const res = await fetch(`${API_HOST}/api/wow/trust?customer_id=${cid}`, { headers: getAuthHeaders() });
+          const data = await res.json();
+          
+          contentPanel.innerHTML = `
+            <div class="glass-panel p-5 rounded-2xl border border-glass-border space-y-6 mt-4">
+              <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                  <h4 class="text-xs font-bold uppercase text-white flex items-center gap-1.5"><i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i> Customer Trust Consistency Meter</h4>
+                  <p class="text-[11px] text-zinc-500 mt-0.5">Evaluates client consistency based on statements and historical contradictions.</p>
+                </div>
+                <div class="relative w-24 h-24 flex flex-col items-center justify-center border-4 border-emerald-500/20 rounded-full shrink-0">
+                  <span class="text-xl font-black font-mono text-emerald-400">${data.trust_score}%</span>
+                  <span class="text-[8px] font-mono text-zinc-500 block">TRUST INDEX</span>
+                </div>
+              </div>
+              
+              <div class="bg-white/2 p-3.5 rounded-xl border border-white/5 space-y-1">
+                <span class="text-[9px] font-mono text-zinc-500 uppercase block">Trust analysis explanation</span>
+                <p class="text-xs text-zinc-300 leading-relaxed font-semibold">${data.explanation}</p>
+              </div>
+              
+              ${data.contradictions.length > 0 ? `
+                <div class="space-y-2">
+                  <span class="text-[9px] font-mono text-rose-400 uppercase block font-bold">Unresolved contradictions affecting score</span>
+                  <div class="space-y-2">
+                    ${data.contradictions.map(c => `
+                      <div class="p-2.5 bg-rose-500/5 border border-rose-500/10 rounded-lg text-xs leading-normal">
+                        <strong>${c.meeting_date_a} vs ${c.meeting_date_b}:</strong> ${c.explanation}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }
+        else if (wowTab === "radar") {
+          const res = await fetch(`${API_HOST}/api/wow/radar?customer_id=${cid}`, { headers: getAuthHeaders() });
+          const data = await res.json();
+          
+          contentPanel.innerHTML = `
+            <div class="glass-panel p-5 rounded-2xl border border-glass-border space-y-5 mt-4">
+              <div>
+                <h4 class="text-xs font-bold uppercase text-white flex items-center gap-1.5"><i data-lucide="shield-alert" class="w-4 h-4 text-rose-500 animate-pulse"></i> AI Project Risk Radar</h4>
+                <p class="text-[11px] text-zinc-500 mt-0.5">Visual project risk dimensions (Scope Creep, Churn, Delays, Alignment).</p>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <!-- Visual canvas radar drawing -->
+                <div class="relative w-48 h-48 bg-black/20 rounded-full border border-white/5 mx-auto flex items-center justify-center">
+                  <canvas id="risk-radar-canvas" width="192" height="192" class="w-full h-full"></canvas>
+                </div>
+                
+                <!-- Legend list -->
+                <div class="space-y-3.5 text-xs">
+                  <div>
+                    <div class="flex justify-between font-mono mb-1 text-[11px]"><span>Scope Creep Risk:</span><span class="font-bold text-zinc-300">${data.scope_creep}%</span></div>
+                    <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden"><div class="h-full bg-amber-400" style="width: ${data.scope_creep}%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between font-mono mb-1 text-[11px]"><span>Churn Risk:</span><span class="font-bold text-zinc-300">${data.churn}%</span></div>
+                    <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden"><div class="h-full bg-rose-500" style="width: ${data.churn}%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between font-mono mb-1 text-[11px]"><span>Project Delay Risk:</span><span class="font-bold text-zinc-300">${data.project_delay}%</span></div>
+                    <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden"><div class="h-full bg-blue-500" style="width: ${data.project_delay}%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between font-mono mb-1 text-[11px]"><span>Stakeholder Alignment:</span><span class="font-bold text-zinc-300">${data.stakeholder_misalignment}%</span></div>
+                    <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden"><div class="h-full bg-brand-purple" style="width: ${data.stakeholder_misalignment}%"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          // Render Radar Canvas
+          setTimeout(() => {
+            drawRadarChart(data.scope_creep, data.churn, data.project_delay, data.stakeholder_misalignment);
+          }, 100);
+        }
+        lucide.createIcons();
+      } catch (err) {}
+    }
+
+    function drawRadarChart(scope, churn, delay, align) {
+      const canvas = document.getElementById("risk-radar-canvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const size = 192;
+      const radius = size / 2;
+      
+      ctx.clearRect(0, 0, size, size);
+      
+      // Draw grid circle backgrounds
+      ctx.strokeStyle = "rgba(255,255,255,0.06)";
+      ctx.lineWidth = 1;
+      for (let i = 1; i <= 3; i++) {
+        ctx.beginPath();
+        ctx.arc(radius, radius, (radius - 10) * (i / 3), 0, 2 * Math.PI);
+        ctx.stroke();
+      }
+      
+      // Radar axes (4 dimensions)
+      const points = [
+        { name: "scope", x: radius, y: 10, val: scope },
+        { name: "churn", x: size - 10, y: radius, val: churn },
+        { name: "delay", x: radius, y: size - 10, val: delay },
+        { name: "align", x: 10, y: radius, val: align }
+      ];
+      
+      ctx.beginPath();
+      ctx.moveTo(radius, 10);
+      ctx.lineTo(radius, size - 10);
+      ctx.moveTo(10, radius);
+      ctx.lineTo(size - 10, radius);
+      ctx.stroke();
+      
+      // Draw actual polygon area
+      ctx.fillStyle = "rgba(0, 245, 255, 0.25)";
+      ctx.strokeStyle = "#00f5ff";
+      ctx.lineWidth = 2;
+      
+      ctx.beginPath();
+      points.forEach((pt, idx) => {
+        const factor = pt.val / 100.0;
+        const dx = (pt.x - radius) * factor + radius;
+        const dy = (pt.y - radius) * factor + radius;
+        
+        if (idx === 0) ctx.moveTo(dx, dy);
+        else ctx.lineTo(dx, dy);
+      });
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+
+    // CHAT BOT
+    let chatHistory = [];
+    async function sendChatPrompt(txt) {
+      if (!txt) return;
+      
+      const chatContainer = document.getElementById("chat-messages-container");
+      chatHistory.push({ role: "user", content: txt });
+      chatContainer.innerHTML += `
+        <div class="flex gap-3 max-w-[80%] ml-auto flex-row-reverse">
+          <div class="w-8 h-8 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan"><i data-lucide="user" class="w-4 h-4"></i></div>
+          <div class="p-3 bg-brand-purple/10 border border-brand-purple/20 text-xs text-white rounded-xl rounded-tr-none">${txt}</div>
+        </div>
+      `;
+      document.getElementById("chat-input").value = "";
+      
+      const spinnerId = "spinner-" + Date.now();
+      chatContainer.innerHTML += `
+        <div id="${spinnerId}" class="flex gap-2 mr-auto items-center text-[10px] font-mono text-zinc-500 animate-pulse">
+          <i data-lucide="bot" class="w-4 h-4 text-brand-purpleLight"></i>
+          <span>Retrieving memory context...</span>
+        </div>
+      `;
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch(`${API_HOST}/api/chat`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ query: txt, customer_id: "acme-corp", history: chatHistory.slice(0, -1) })
+        });
+        const data = await res.json();
+        
+        document.getElementById(spinnerId).remove();
+        chatHistory.push({ role: "assistant", content: data.answer });
+        chatContainer.innerHTML += `
+          <div class="flex gap-3 max-w-[80%] mr-auto">
+            <div class="w-8 h-8 rounded-full bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center text-brand-purpleLight"><i data-lucide="bot" class="w-4 h-4"></i></div>
+            <div class="p-3 bg-white/2 border border-white/5 text-xs text-zinc-300 rounded-xl rounded-tl-none whitespace-pre-line">${data.answer}</div>
+          </div>
+        `;
+
+        document.getElementById("chat-references-stack").innerHTML = data.referenced_meetings.map(ref => `
+          <div class="p-2.5 bg-white/2 border border-white/4 rounded-lg">
+            <h5 class="text-xs font-bold text-white">${ref.title}</h5>
+            <span class="text-[9px] font-mono text-zinc-500">${ref.meeting_date}</span>
+          </div>
+        `).join('');
+
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        lucide.createIcons();
+      } catch (err) {}
+    }
+
+    function handleChatSubmit(e) {
+      e.preventDefault();
+      const txt = document.getElementById("chat-input").value;
+      sendChatPrompt(txt);
+    }
+
+
+    // SETTINGS PANEL
+    async function saveSettings(e) {
+      e.preventDefault();
+      const key = document.getElementById("settings-api-key").value;
+      const prompt = document.getElementById("settings-prompt").value;
+
+      showLoader("Updating settings configurations...");
+      try {
+        const res = await fetch(`${API_HOST}/api/settings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ groq_api_key: key || null, system_prompt: prompt })
+        });
+        if (res.ok) {
+          alert("Settings saved successfully.");
+          document.getElementById("settings-api-key").value = "";
+          loadSettingsData();
+        }
+      } catch (err) {
+      } finally {
+        hideLoader();
+      }
+    }
+
+
+    // FILE INGESTIONS
+    function loadTemplate(name) {
+      if (name === 'acme') {
+        document.getElementById("upload-title").value = "Acme Corp: Mobile Decision Shift";
+        document.getElementById("upload-customer").value = "acme-corp";
+        document.getElementById("upload-date").value = "2026-06-05";
+        document.getElementById("upload-duration").value = "1200";
+        document.getElementById("upload-transcript").value = 
+`Sarah Jenkins (VP Product): We need to cancel the web project and focus 100% on native mobile development immediately.
+John Doe (CTO): Wait, we decided in January to focus on web stability first and delay mobile. This is a complete contradiction.
+Sarah Jenkins (VP Product): The priorities have shifted. The board wants the mobile app live on the store in 30 days.
+Mark Davis (Client PM): If we go mobile, we must also support OAuth2 logins via Apple ID. That is a mandatory security requirement.`;
+      } else {
+        document.getElementById("upload-title").value = "Nebula Systems: Security Compliance Review";
+        document.getElementById("upload-customer").value = "nebula-systems";
+        document.getElementById("upload-date").value = "2026-06-06";
+        document.getElementById("upload-duration").value = "1800";
+        document.getElementById("upload-transcript").value = 
+`Alice Vance (CISO): We need to review cloud compliance. All ports must block incoming traffic on 8080.
+Bob Jenkins (Cloud Admin): We decided last week to open 8080 temporarily for dev test runs.
+Alice Vance (CISO): No security policy forbids it. Close it by Friday.`;
+      }
+    }
+
+    async function processIngest() {
+      const title = document.getElementById("upload-title").value;
+      const cid = document.getElementById("upload-customer").value;
+      const date = document.getElementById("upload-date").value;
+      const duration = document.getElementById("upload-duration").value;
+      const transcript = document.getElementById("upload-transcript").value;
+
+      if (!title || !transcript) return;
+
+      showLoader("Ingesting raw dialogue lines...");
+
+      const lines = transcript.split("\n").filter(l => l.includes(":")).map(l => {
+        const parts = l.split(":");
+        return { speaker: parts[0].strip ? parts[0].strip() : parts[0].trim(), text: parts[1].strip ? parts[1].strip() : parts[1].trim() };
+      });
+
+      const mId = "m-" + Date.now();
+      try {
+        const res = await fetch(`${API_HOST}/api/meetings`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({
+            id: mId,
+            title,
+            customer_id: cid,
+            meeting_date: date,
+            duration_seconds: parseInt(duration),
+            transcript: lines
+          })
+        });
+
+        if (res.ok) {
+          setTimeout(() => {
+            hideLoader();
+            navigateHistoryTo(mId);
+          }, 2000);
+        }
+      } catch (err) {
+        hideLoader();
+        alert("Verification server error.");
+      }
+    }
+
+
+    // SINE WAVE SIMULATOR
+    let recordTimer = 0;
+    let recordInterval = null;
+    let micStream = null;
+
+    async function startMicRecording() {
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (e) {
+        console.warn("Using simulation for audio recorder.");
+      }
+
+      document.getElementById("btn-record-start").classList.add("hidden");
+      document.getElementById("btn-record-stop").classList.remove("hidden");
+      document.getElementById("recorder-status").innerText = "RECORDING ACTIVE";
+      document.getElementById("recorder-standby").classList.add("hidden");
+
+      recordTimer = 0;
+      document.getElementById("recording-timer").innerText = "00:00";
+      recordInterval = setInterval(() => {
+        recordTimer++;
+        const m = Math.floor(recordTimer / 60).toString().padStart(2, '0');
+        const s = (recordTimer % 60).toString().padStart(2, '0');
+        document.getElementById("recording-timer").innerText = `${m}:${s}`;
+      }, 1000);
+
+      window.isRecording = true;
+      animateRecorderWave();
+    }
+
+    function stopMicRecording() {
+      if (micStream) {
+        micStream.getTracks().forEach(t => t.stop());
+      }
+      clearInterval(recordInterval);
+      window.isRecording = false;
+
+      document.getElementById("btn-record-start").classList.remove("hidden");
+      document.getElementById("btn-record-stop").classList.add("hidden");
+      document.getElementById("recorder-status").innerText = "STANDBY";
+      document.getElementById("recorder-standby").classList.remove("hidden");
+
+      showLoader("Transcribing captured audio logs...");
+
+      setTimeout(async () => {
+        const mId = "rec-" + Date.now();
+        try {
+          const res = await fetch(`${API_HOST}/api/meetings`, {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+              id: mId,
+              title: "Vortex Retail: Live Recorder Sync Review",
+              customer_id: "vortex-retail",
+              meeting_date: new Date().toISOString().split('T')[0],
+              duration_seconds: recordTimer || 60,
+              transcript: [
+                { speaker: "Client Lead", text: "We need the checkout cart optimized. Let's make sure it handles Stripe payments by July 15." },
+                { speaker: "Project Architect", text: "We decided to target Stripe integrations as the primary payment gateway." }
+              ]
+            })
+          });
+          if (res.ok) {
+            hideLoader();
+            navigateHistoryTo(mId);
+          }
+        } catch (err) {
+          hideLoader();
+        }
+      }, 3000);
+    }
+
+    function animateRecorderWave() {
+      const canvas = document.getElementById("record-canvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      let phase = 0;
+
+      function render() {
+        if (!window.isRecording) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "rgba(112, 0, 255, 0.6)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let x = 0; x < canvas.width; x++) {
+          const y = canvas.height / 2 + Math.sin(x * 0.05 + phase) * 20 * (Math.random() * 0.2 + 0.9);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        phase += 0.2;
+        requestAnimationFrame(render);
+      }
+      render();
+    }
+
+    function showLoader(msg) {
+      document.getElementById("loader-message").innerText = msg;
+      document.getElementById("loader-overlay").classList.remove("hidden");
+    }
+
+    function hideLoader() {
+      document.getElementById("loader-overlay").classList.add("hidden");
+    }
+
+    // INITIALIZATION
+    window.onload = () => {
+      loadTemplate('acme');
+      checkAuthSession();
+    };
+  </script>
+</body>
+</html>
